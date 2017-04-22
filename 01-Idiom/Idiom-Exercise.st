@@ -13,69 +13,79 @@ TestCase subclass: #IdiomTest
 	poolDictionaries: ''
 	category: 'Idiom-Exercise'!
 
-!IdiomTest methodsFor: 'testing' stamp: 'HAW 4/14/2017 16:56:37'!
-test01AddingCustomerShouldNotTakeMoreThan50Milliseconds
+!IdiomTest methodsFor: 'testing' stamp: 'PR 4/22/2017 11:48:33'!
+assert: aClosure doesNotTakeMoreThan: aNumberOfMilliseconds
 
-	| customerBook millisecondsBeforeRunning millisecondsAfterRunning |
-	
-	customerBook := CustomerBook  new.
+	| millisecondsBeforeRunning millisecondsAfterRunning |
 	
 	millisecondsBeforeRunning := Time millisecondClockValue.
-	customerBook addCustomerNamed: 'John Lennon'.
+	aClosure value.
 	millisecondsAfterRunning := Time millisecondClockValue.
 	
-	self assert: (millisecondsAfterRunning-millisecondsBeforeRunning) < 50 
+	self assert: millisecondsAfterRunning-millisecondsBeforeRunning<aNumberOfMilliseconds.
 	
 ! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 4/11/2016 20:29'!
+!IdiomTest methodsFor: 'testing' stamp: 'PR 4/22/2017 11:48:42'!
+check: aClosure on: anError withAssertions: anOrderedCollectionOfAssertions
+		
+	aClosure on: anError do: [ :theError |
+		anOrderedCollectionOfAssertions collect: [:anAssertion | anAssertion value: theError ] 
+	].
+	
+! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PR 4/22/2017 11:48:53'!
+test01AddingCustomerShouldNotTakeMoreThan50Milliseconds
+
+	| customerBook |
+	
+	customerBook := CustomerBook  new.
+	
+	self assert: [ customerBook addCustomerNamed: 'John Lennon' ] doesNotTakeMoreThan: 50.! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PR 4/22/2017 11:49:02'!
 test02RemovingCustomerShouldNotTakeMoreThan100Milliseconds
 
-	| customerBook millisecondsBeforeRunning millisecondsAfterRunning paulMcCartney |
+	| customerBook paulMcCartney |
 	
 	customerBook := CustomerBook  new.
 	paulMcCartney := 'Paul McCartney'.
-	
 	customerBook addCustomerNamed: paulMcCartney.
-	  
-	millisecondsBeforeRunning := Time millisecondClockValue.
-	customerBook removeCustomerNamed: paulMcCartney.
-	millisecondsAfterRunning := Time millisecondClockValue.
-	
-	self assert: (millisecondsAfterRunning-millisecondsBeforeRunning) < 100 
-	
-! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 5/9/2012 18:12'!
+	self assert: [ customerBook removeCustomerNamed: paulMcCartney ] doesNotTakeMoreThan: 100.! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PR 4/22/2017 11:49:12'!
 test03CanNotAddACustomerWithEmptyName 
 
-	| customerBook |
+	| customerBook anOrderedCollectionOfAssertions |
 			
 	customerBook := CustomerBook new.
+	
+	anOrderedCollectionOfAssertions := OrderedCollection new.
+	anOrderedCollectionOfAssertions add: [ :anError | self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage ].
+	anOrderedCollectionOfAssertions add: [ :anError | self assert: customerBook isEmpty ].
+	self check: [ 
+		customerBook addCustomerNamed: ''.
+		self fail
+	] on: Error withAssertions: anOrderedCollectionOfAssertions.! !
 
-	[ customerBook addCustomerNamed: ''.
-	self fail ]
-		on: Error 
-		do: [ :anError | 
-			self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage.
-			self assert: customerBook isEmpty ]! !
-
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 5/16/2012 16:50'!
+!IdiomTest methodsFor: 'testing' stamp: 'PR 4/22/2017 11:49:20'!
 test04CanNotRemoveAndInvalidCustomer
 	
-	| customerBook johnLennon |
+	| customerBook johnLennon anOrderedCollectionOfAssertions |
 			
 	customerBook := CustomerBook new.
 	johnLennon := 'John Lennon'.
 	customerBook addCustomerNamed: johnLennon.
-	
-	[ customerBook removeCustomerNamed: 'Paul McCartney'.
-	self fail ]
-		on: NotFound 
-		do: [ :anError | 
-			self assert: customerBook numberOfCustomers = 1.
-			self assert: (customerBook includesCustomerNamed: johnLennon) ]
-! !
+
+	anOrderedCollectionOfAssertions := OrderedCollection new.
+	anOrderedCollectionOfAssertions add: [ :anError | self assert: customerBook numberOfCustomers = 1].
+	anOrderedCollectionOfAssertions add: [ :anError | self assert: (customerBook includesCustomerNamed: johnLennon) ].
+	self check: [ 
+		customerBook removeCustomerNamed: 'Paul McCartney'.
+		self fail 
+	] on: NotFound withAssertions: anOrderedCollectionOfAssertions.! !
 
 
 !classDefinition: #CustomerBook category: #'Idiom-Exercise'!
