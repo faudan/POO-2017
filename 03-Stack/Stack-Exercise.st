@@ -202,10 +202,6 @@ Object subclass: #OOStackedObject
 content
 	^self subclassResponsibility! !
 
-!OOStackedObject methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 20:48:18'!
-isEmpty
-	^self size = 0! !
-
 !OOStackedObject methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 20:32:09'!
 previous
 	^self subclassResponsibility! !
@@ -259,10 +255,6 @@ OOStackedObject subclass: #OOStackBase
 
 !OOStackBase methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 21:16:09'!
 content
-	^Error new signal: OOStack stackEmptyErrorDescription! !
-
-!OOStackBase methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 21:16:21'!
-pop
 	^Error new signal: OOStack stackEmptyErrorDescription! !
 
 !OOStackBase methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 21:16:26'!
