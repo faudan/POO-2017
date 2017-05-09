@@ -161,17 +161,18 @@ push: anObject
 	aStackedObject := OOPushedObject withPrevious: aStackedObject withObject: anObject
 	! !
 
-!OOStack methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 20:59:24'!
-size
-	^aStackedObject size
-	! !
-
 !OOStack methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 20:58:44'!
 top
 	^aStackedObject content
 	! !
 
-!OOStack methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 20:43:04'!
+
+!OOStack methodsFor: 'private' stamp: 'pR 5/8/2017 20:59:24'!
+size
+	^aStackedObject size
+	! !
+
+!OOStack methodsFor: 'private' stamp: 'pR 5/8/2017 20:43:04'!
 withStackedObject: aNewStackedObject
 	aStackedObject := aNewStackedObject! !
 
@@ -230,7 +231,8 @@ previous
 size
 	^1 + previous size! !
 
-!OOPushedObject methodsFor: 'as yet unclassified' stamp: 'pR 5/8/2017 20:45:52'!
+
+!OOPushedObject methodsFor: 'private' stamp: 'pR 5/8/2017 20:45:52'!
 withPrevious: aStackedObject withObject: anObject
 	previous := aStackedObject.
 	content := anObject! !
