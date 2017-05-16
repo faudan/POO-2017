@@ -64,8 +64,8 @@ test06CreateCellOutsideBounds
 		withExceptionDo: [ :anError |
 			self assert: anError messageText equals: 'celda fuera de rango' ]! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'pR 5/12/2017 10:26:44'!
-test07DeadCellWithMoreThanThreeAliveNeighResurects
+!GOLTest methodsFor: 'as yet unclassified' stamp: 'pR 5/16/2017 17:41:21'!
+test07DeadCellWithMoreThanThreeAliveNeighDoesNotResurect
 
 	|gameOfLife |
 	
@@ -73,6 +73,26 @@ test07DeadCellWithMoreThanThreeAliveNeighResurects
 	gameOfLife nextGeneration.
 	
 	self deny: (gameOfLife isDeadAt: 1@1) ! !
+
+!GOLTest methodsFor: 'as yet unclassified' stamp: 'pR 5/16/2017 17:42:34'!
+test08DeadCellWithTwoAliveNeighStaysDead
+
+	|gameOfLife |
+	
+	gameOfLife := GameOfLife withLiveCells: {  0@0. 1@0. } withSize: 3@3.
+	gameOfLife nextGeneration.
+	
+	self assert: (gameOfLife isDeadAt: 1@1) ! !
+
+!GOLTest methodsFor: 'as yet unclassified' stamp: 'pR 5/16/2017 17:42:24'!
+test09DeadCellWithOneAliveNeighStaysDead
+
+	|gameOfLife |
+	
+	gameOfLife := GameOfLife withLiveCells: {  0@0.  } withSize: 3@3.
+	gameOfLife nextGeneration.
+	
+	self assert: (gameOfLife isDeadAt: 1@1) ! !
 
 
 !classDefinition: #GameOfLife category: #GOL!
@@ -89,7 +109,21 @@ initializeWith: aSetOfAliveCells withSize: aSize
 	aliveCells := aSetOfAliveCells.! !
 
 
-!GameOfLife methodsFor: 'private' stamp: 'pR 5/12/2017 11:49:05'!
+!GameOfLife methodsFor: 'evaluating' stamp: 'pR 5/12/2017 10:29:07'!
+hasToResurrect: aCell
+
+	^(self numberOfAliveNeighboursOf: aCell) >= 3! !
+
+!GameOfLife methodsFor: 'evaluating' stamp: 'pR 5/12/2017 11:28:41'!
+hasToSurvive: aCell
+	
+	| numberOfAliveNeighbours|
+	numberOfAliveNeighbours := self numberOfAliveNeighboursOf: aCell.
+	
+	^numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3]! !
+
+
+!GameOfLife methodsFor: 'accessing' stamp: 'pR 5/12/2017 11:49:05'!
 deadCellsBorderingAliveCells
 	
 	| deadCells |
@@ -98,45 +132,33 @@ deadCellsBorderingAliveCells
 	deadCells := deadCells select: [:eachCell | self isDeadAt: eachCell].
 	^deadCells	! !
 
-!GameOfLife methodsFor: 'private' stamp: 'pR 5/12/2017 10:29:07'!
-hasToResurrect: aCell
+!GameOfLife methodsFor: 'accessing' stamp: 'pR 5/12/2017 10:51:54'!
+isAliveAt: aCell
 
-	^(self numberOfAliveNeighboursOf: aCell) >= 3! !
+	^aliveCells includes: aCell! !
 
-!GameOfLife methodsFor: 'private' stamp: 'pR 5/12/2017 11:28:41'!
-hasToSurvive: aCell
-	
-	| numberOfAliveNeighbours|
-	numberOfAliveNeighbours := self numberOfAliveNeighboursOf: aCell.
-	
-	^numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3]! !
+!GameOfLife methodsFor: 'accessing' stamp: 'pR 5/16/2017 17:31:54'!
+isDeadAt: aCell
 
-!GameOfLife methodsFor: 'private' stamp: 'pR 5/12/2017 11:28:22'!
-inBounds: aCell
-	^(aCell x between: 0 and: size x) and: [ aCell y between: 0 and: size y]! !
+	^(self isAliveAt: aCell) not! !
 
-!GameOfLife methodsFor: 'private' stamp: 'pR 5/12/2017 11:46:13'!
+!GameOfLife methodsFor: 'accessing' stamp: 'pR 5/12/2017 11:46:13'!
 neighborsInBoundOf: anAliveCell
 	
 	^(anAliveCell eightNeighbors select: [:eachCell | self inBounds: eachCell]) ! !
 
-!GameOfLife methodsFor: 'private' stamp: 'HAW 5/10/2017 10:29:35'!
+!GameOfLife methodsFor: 'accessing' stamp: 'HAW 5/10/2017 10:29:35'!
 numberOfAliveNeighboursOf: aCell
 
 	^(aCell eightNeighbors intersection: aliveCells) size! !
 
 
-!GameOfLife methodsFor: 'public' stamp: 'pR 5/12/2017 10:51:54'!
-isAliveAt: aCell
+!GameOfLife methodsFor: 'inspecting' stamp: 'pR 5/12/2017 11:28:22'!
+inBounds: aCell
+	^(aCell x between: 0 and: size x) and: [ aCell y between: 0 and: size y]! !
 
-	^aliveCells includes: aCell! !
 
-!GameOfLife methodsFor: 'public' stamp: 'HAW 5/10/2017 10:28:24'!
-isDeadAt: aCell
-
-	^(aliveCells includes: aCell) not! !
-
-!GameOfLife methodsFor: 'public' stamp: 'pR 5/12/2017 11:38:06'!
+!GameOfLife methodsFor: 'stepping' stamp: 'pR 5/12/2017 11:38:06'!
 nextGeneration
 	
 	aliveCells := (aliveCells select: [ :aCell | self hasToSurvive: aCell ]) union:
