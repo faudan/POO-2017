@@ -5,12 +5,29 @@ TestCase subclass: #DistanciaTest
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:09:47'!
+!DistanciaTest methodsFor: 'test initialization' stamp: 'pR 5/26/2017 14:09:47'!
 test01InitializeDistanceOneMeter
 	 
 	self assert: (Distancia initializeWithMeters: 1) class = Distancia! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:12:13'!
+!DistanciaTest methodsFor: 'test initialization' stamp: 'pR 5/26/2017 14:27:22'!
+test05DistanceCanNotBeNegativeWithMinus1
+	
+	self
+		should: [ Distancia initializeWithMeters: -1  ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: 'prohibido crear distancias negativas']! !
+
+!DistanciaTest methodsFor: 'test initialization' stamp: 'pR 5/26/2017 14:30:12'!
+test06DistanceCanNotBeNegativeWithMinus2
+	
+	self
+		should: [ Distancia initializeWithMeters: -2  ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: 'prohibido crear distancias negativas']! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation +' stamp: 'pR 5/26/2017 14:12:13'!
 test02OneMeterPlusOneMeterEqualsTwoMeters
 	| oneMeter twoMeters |
 	
@@ -19,16 +36,7 @@ test02OneMeterPlusOneMeterEqualsTwoMeters
 	
 	self assert: (oneMeter + oneMeter) = twoMeters.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:16:03'!
-test03OneMeterDoesNotEqualTwoMeters
-	| oneMeter twoMeters |
-	
-	oneMeter := Distancia initializeWithMeters: 1.
-	twoMeters := Distancia initializeWithMeters: 2.
-	
-	self deny: oneMeter = twoMeters.! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:23:16'!
+!DistanciaTest methodsFor: 'test arithmetic operation +' stamp: 'pR 5/26/2017 14:23:16'!
 test04OneMeterPlusTwoMetersEqualThreeMeters
 	| oneMeter twoMeters threeMeters |
 	
@@ -38,23 +46,80 @@ test04OneMeterPlusTwoMetersEqualThreeMeters
 	
 	self assert: (oneMeter + twoMeters) = threeMeters! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:27:22'!
-test05DistanceCanNotBeNegativeWithMinus1
-	
-	self
-		should: [ Distancia initializeWithMeters: -1  ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: 'prohibido crear distancias negativas']! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:30:12'!
-test06DistanceCanNotBeNegativeWithMinus2
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:16:03'!
+test03OneMeterDoesNotEqualTwoMeters
+	| oneMeter twoMeters |
 	
-	self
-		should: [ Distancia initializeWithMeters: -2  ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: 'prohibido crear distancias negativas']! !
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	
+	self deny: oneMeter = twoMeters.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:32:24'!
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:48:33'!
+test15OneMeterEqualsOneHundredCentimeters
+	| oneMeter oneHundredCentimeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	oneHundredCentimeters := Distancia initializeWithCentimeters: 100.
+	
+	self assert: oneMeter = oneHundredCentimeters! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:50:34'!
+test16OneAndAHalfMetersEqualsOneHundredAnfFiftyCentimeters
+	| oneAndAHalfMeters oneHundredAndFiftyCentimeters |
+	
+	oneAndAHalfMeters := Distancia initializeWithMeters: 3 / 2.
+	oneHundredAndFiftyCentimeters := Distancia initializeWithCentimeters: 150.
+	
+	self assert: oneAndAHalfMeters = oneHundredAndFiftyCentimeters! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:53:38'!
+test17OneKilometerGreaterThanFiveHundredMeters
+	| oneKilometer fiveHundredMeters |
+	
+	oneKilometer := Distancia initializeWithKilometers: 1.
+	fiveHundredMeters := Distancia initializeWithMeters: 500.
+	
+	self assert: oneKilometer > fiveHundredMeters! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:57:13'!
+test19OneCentimeterNotGreaterThanOneMeter
+	| oneCentimeter oneMeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self deny: oneCentimeter > oneMeter! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:59:09'!
+test20OneCentimeterGreaterOrEqualThanOneCentimeter
+	| oneCentimeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	
+	self assert: oneCentimeter >= oneCentimeter! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 15:00:47'!
+test21OneCentimeterLessThanOrEqualThanOneMeter
+	| oneCentimeter oneMeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: oneCentimeter <= oneMeter! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 15:02:20'!
+test22OneCentimeterLessThanOneMeter
+	| oneCentimeter oneMeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: oneCentimeter < oneMeter! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:32:24'!
 test07MultiplyDistance1MeterTimesNumberThreeGivesThreeMeters
 	| oneMeter threeMeters |
 	
@@ -63,7 +128,7 @@ test07MultiplyDistance1MeterTimesNumberThreeGivesThreeMeters
 	
 	self assert: oneMeter * 3 = threeMeters.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:35:20'!
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:35:20'!
 test08MultiplyDistance1MeterTimesNumberTwoGivesTwoMeters
 	| oneMeter twoMeters |
 	
@@ -72,7 +137,7 @@ test08MultiplyDistance1MeterTimesNumberTwoGivesTwoMeters
 	
 	self assert: oneMeter * 2 = twoMeters.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:35:45'!
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:35:45'!
 test09MultiplyNumberThreeTimesDistance1MeterTimesGivesThreeMeters
 	| oneMeter threeMeters |
 	
@@ -81,7 +146,7 @@ test09MultiplyNumberThreeTimesDistance1MeterTimesGivesThreeMeters
 	
 	self assert: 3 * oneMeter = threeMeters.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:37:35'!
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:37:35'!
 test10MultiplyNumberTwoTimesDistance1MeterTimesGivesTwoMeters
 	| oneMeter twoMeters |
 	
@@ -90,7 +155,17 @@ test10MultiplyNumberTwoTimesDistance1MeterTimesGivesTwoMeters
 	
 	self assert: 2 * oneMeter = twoMeters.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:40:14'!
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:55:11'!
+test18OneKilometerEqualsTwoTimesFiveHundredMeters
+	| oneKilometer fiveHundredMeters |
+	
+	oneKilometer := Distancia initializeWithKilometers: 1.
+	fiveHundredMeters := Distancia initializeWithMeters: 500.
+	
+	self assert: (2 * fiveHundredMeters) = oneKilometer! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation /' stamp: 'pR 5/26/2017 14:40:14'!
 test11FourMetersDividedByNumberTwoEqualsTwoMeters
 	| fourMeters twoMeters |
 	
@@ -99,7 +174,7 @@ test11FourMetersDividedByNumberTwoEqualsTwoMeters
 	
 	self assert: fourMeters / 2 = twoMeters! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:42:44'!
+!DistanciaTest methodsFor: 'test arithmetic operation /' stamp: 'pR 5/26/2017 14:42:44'!
 test12FourMetersDividedByNumberEightEqualsHalfAMeter
 	| fourMeters halfMeter |
 	
@@ -108,7 +183,8 @@ test12FourMetersDividedByNumberEightEqualsHalfAMeter
 	
 	self assert: fourMeters / 8 = halfMeter! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:44:37'!
+
+!DistanciaTest methodsFor: 'test arithmetic operation -' stamp: 'pR 5/26/2017 14:44:37'!
 test13FourMetersMinusTwoMetersEqualTwoMeters
 	| fourMeters twoMeters |
 	
@@ -117,7 +193,7 @@ test13FourMetersMinusTwoMetersEqualTwoMeters
 	
 	self assert: fourMeters - twoMeters = twoMeters! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:46:05'!
+!DistanciaTest methodsFor: 'test arithmetic operation -' stamp: 'pR 5/26/2017 14:46:05'!
 test14FourMetersMinusThreeMetersEqualOneMeters
 	| fourMeters threeMeters oneMeter |
 	
@@ -127,78 +203,8 @@ test14FourMetersMinusThreeMetersEqualOneMeters
 	
 	self assert: fourMeters - threeMeters = oneMeter! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:48:33'!
-test15OneMeterEqualsOneHundredCentimeters
-	| oneMeter oneHundredCentimeters |
-	
-	oneMeter := Distancia initializeWithMeters: 1.
-	oneHundredCentimeters := Distancia initializeWithCentimeters: 100.
-	
-	self assert: oneMeter = oneHundredCentimeters! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:50:34'!
-test16OneAndAHalfMetersEqualsOneHundredAnfFiftyCentimeters
-	| oneAndAHalfMeters oneHundredAndFiftyCentimeters |
-	
-	oneAndAHalfMeters := Distancia initializeWithMeters: 3 / 2.
-	oneHundredAndFiftyCentimeters := Distancia initializeWithCentimeters: 150.
-	
-	self assert: oneAndAHalfMeters = oneHundredAndFiftyCentimeters! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:53:38'!
-test17OneKilometerGreaterThanFiveHundredMeters
-	| oneKilometer fiveHundredMeters |
-	
-	oneKilometer := Distancia initializeWithKilometers: 1.
-	fiveHundredMeters := Distancia initializeWithMeters: 500.
-	
-	self assert: oneKilometer > fiveHundredMeters! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:55:11'!
-test18OneKilometerEqualsTwoTimesFiveHundredMeters
-	| oneKilometer fiveHundredMeters |
-	
-	oneKilometer := Distancia initializeWithKilometers: 1.
-	fiveHundredMeters := Distancia initializeWithMeters: 500.
-	
-	self assert: (2 * fiveHundredMeters) = oneKilometer! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:57:13'!
-test19OneCentimeterNotGreaterThanOneMeter
-	| oneCentimeter oneMeter |
-	
-	oneCentimeter := Distancia initializeWithCentimeters: 1.
-	oneMeter := Distancia initializeWithMeters: 1.
-	
-	self deny: oneCentimeter > oneMeter! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 14:59:09'!
-test20OneCentimeterGreaterOrEqualThanOneCentimeter
-	| oneCentimeter |
-	
-	oneCentimeter := Distancia initializeWithCentimeters: 1.
-	
-	self assert: oneCentimeter >= oneCentimeter! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 15:00:47'!
-test21OneCentimeterLessThanOrEqualThanOneMeter
-	| oneCentimeter oneMeter |
-	
-	oneCentimeter := Distancia initializeWithCentimeters: 1.
-	oneMeter := Distancia initializeWithMeters: 1.
-	
-	self assert: oneCentimeter <= oneMeter! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 15:02:20'!
-test22OneCentimeterLessThanOneMeter
-	| oneCentimeter oneMeter |
-	
-	oneCentimeter := Distancia initializeWithCentimeters: 1.
-	oneMeter := Distancia initializeWithMeters: 1.
-	
-	self assert: oneCentimeter < oneMeter! !
-
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 15:47:57'!
+!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:47:57'!
 test23IntervalBetweenMetersWithStepsInMeters
 	| anInterval oneMeter fourMeters totalSum |
 	
@@ -212,7 +218,7 @@ test23IntervalBetweenMetersWithStepsInMeters
 	
 	self assert: totalSum = 10.! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 15:48:12'!
+!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:48:12'!
 test24IntervalBetweenMetersWithStepsInCentimeters
 	| anInterval oneMeter twoMeters oneCentimeter totalNumbersTraversed |
 	
@@ -340,16 +346,16 @@ adaptToNumber: aSmallInteger andSend: aSymbol
 	
 	^meters >= aDistancia meters! !
 
+!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 15:28:14'!
+isZero
+	
+	^meters = 0! !
+
 
 !Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 15:25:43'!
 abs
 	
 	^meters! !
-
-!Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 15:28:14'!
-isZero
-	
-	^meters = 0! !
 
 !Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 14:17:08'!
 meters
