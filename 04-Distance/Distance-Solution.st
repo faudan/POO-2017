@@ -1,3 +1,38 @@
+!classDefinition: #DistanciaInterval category: #'Distance-Solution'!
+SequenceableCollection subclass: #DistanciaInterval
+	instanceVariableNames: 'start end step intervalo'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:14:50'!
+do: aClosure
+
+intervalo do:[:each | aClosure value: each ].! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:07:03'!
+from: aStart to: anEnd by: aStep
+	
+	intervalo := Interval from:aStart to:anEnd by:aStep.! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:08:11'!
+includes: aDistance
+
+	intervalo do: [ :each | aDistance = each ifTrue:[^true]].
+	^false! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'DistanciaInterval class' category: #'Distance-Solution'!
+DistanciaInterval class
+	instanceVariableNames: ''!
+
+!DistanciaInterval class methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 00:59:39'!
+from: aStart to: anEnd by: aStep
+	
+	^ self new from: aStart to: anEnd by: aStep! !
+
+
 !classDefinition: #DistanciaTest category: #'Distance-Solution'!
 TestCase subclass: #DistanciaTest
 	instanceVariableNames: ''
@@ -462,38 +497,3 @@ canNotCreateNegativeDistanceErrorMessage
 checkIsNotNegative: aSmallInteger
 
 	aSmallInteger < 0 ifTrue: [^self error: self canNotCreateNegativeDistanceErrorMessage]! !
-
-
-!classDefinition: #DistanciaInterval category: #'Distance-Solution'!
-Object subclass: #DistanciaInterval
-	instanceVariableNames: 'start end step intervalo'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:14:50'!
-do: aClosure
-
-intervalo do:[:each | aClosure value: each ].! !
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:07:03'!
-from: aStart to: anEnd by: aStep
-	
-	intervalo := Interval from:aStart to:anEnd by:aStep.! !
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:08:11'!
-includes: aDistance
-
-	intervalo do: [ :each | aDistance = each ifTrue:[^true]].
-	^false! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'DistanciaInterval class' category: #'Distance-Solution'!
-DistanciaInterval class
-	instanceVariableNames: ''!
-
-!DistanciaInterval class methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 00:59:39'!
-from: aStart to: anEnd by: aStep
-	
-	^ self new from: aStart to: anEnd by: aStep! !
