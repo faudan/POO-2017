@@ -204,34 +204,61 @@ test14FourMetersMinusThreeMetersEqualOneMeters
 	self assert: fourMeters - threeMeters = oneMeter! !
 
 
-!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:47:57'!
+!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 00:45:22'!
 test23IntervalBetweenMetersWithStepsInMeters
 	| anInterval oneMeter fourMeters totalSum |
 	
 	oneMeter := Distancia initializeWithMeters: 1.
 	fourMeters := Distancia initializeWithMeters: 4.
 	
-	anInterval := Interval from: oneMeter to: fourMeters by: oneMeter.
+	anInterval := oneMeter to: fourMeters.
 	
 	totalSum := 0.
 	anInterval do: [ :each | totalSum := totalSum + each meters ].
 	
 	self assert: totalSum = 10.! !
 
-!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:48:12'!
+!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 01:30:40'!
 test24IntervalBetweenMetersWithStepsInCentimeters
-	| anInterval oneMeter twoMeters oneCentimeter totalNumbersTraversed |
+	| oneMeter twoMeters oneCentimeter totalNumbersTraversed |
 	
 	oneMeter := Distancia initializeWithMeters: 1.
 	twoMeters := Distancia initializeWithMeters: 2.
 	oneCentimeter := Distancia initializeWithCentimeters: 1.
 	
-	anInterval := Interval from: oneMeter to: twoMeters by: oneCentimeter.
 	
-	totalNumbersTraversed := 0.
-	anInterval do: [ :each | totalNumbersTraversed := totalNumbersTraversed + 1 ].
+	
+	totalNumbersTraversed := 0.	oneMeter to: twoMeters by: oneCentimeter do: [ :each | totalNumbersTraversed := totalNumbersTraversed + 1 ].
 	
 	self assert: totalNumbersTraversed = 101.! !
+
+!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 01:09:50'!
+test25IntervalBetweenAMeterAndThreeMetersIncludesTwoMeters
+	| anInterval oneMeter twoMeters threeMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	threeMeters := Distancia initializeWithMeters: 3.
+	
+	anInterval := oneMeter to: threeMeters.
+	
+
+	
+	self assert: (anInterval includes: twoMeters).! !
+
+!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 01:17:08'!
+test26IntervalBetweenAMeterAndThreeMetersDoesNotIncludeOneAndAHalfMeters
+	| anInterval oneMeter threeMeters oneAndAHalfMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	oneAndAHalfMeters := Distancia initializeWithMeters: 1.5.
+	threeMeters := Distancia initializeWithMeters: 3.
+	
+	anInterval := oneMeter to: threeMeters.
+	
+
+	
+	self deny: (anInterval includes: oneAndAHalfMeters ).! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
@@ -346,27 +373,60 @@ adaptToNumber: aSmallInteger andSend: aSymbol
 	
 	^meters >= aDistancia meters! !
 
-!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 15:28:14'!
-isZero
-	
-	^meters = 0! !
-
 
 !Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 15:25:43'!
 abs
 	
 	^meters! !
 
+!Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 15:28:14'!
+isZero
+	
+	^meters = 0! !
+
 !Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 14:17:08'!
 meters
 	
 	^meters! !
+
+
+!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:47:30'!
+to: aDistance
+
+| unMetro |
+unMetro := Distancia initializeWithMeters: 1.
+^self to: aDistance by: unMetro.! !
+
+!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:05:24'!
+to: aDistance by: aStep
+
+^DistanciaInterval from: self to: aDistance by: aStep.! !
+
+!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:29:55'!
+to: aDistance by: aStep do: aClosure
+
+| anInterval |
+anInterval := DistanciaInterval from: self to: aDistance by: aStep.
+
+anInterval do: aClosure.! !
+
+!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:33:25'!
+to: aDistance do: aClosure
+
+| unMetro |
+unMetro := Distancia initializeWithMeters: 1.
+self to: aDistance by: unMetro do: aClosure.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Distancia class' category: #'Distance-Solution'!
 Distancia class
 	instanceVariableNames: ''!
+
+!Distancia class methodsFor: 'initialization' stamp: 'df 5/27/2017 21:17:08'!
+withMeters: aSize
+	^Distancia new withMeters: aSize! !
+
 
 !Distancia class methodsFor: 'class initialization' stamp: 'pR 5/26/2017 15:15:01'!
 initializeScaleVsMetersLike: aScale withNumberOfUnits: aNumberOfUnits
@@ -402,3 +462,38 @@ canNotCreateNegativeDistanceErrorMessage
 checkIsNotNegative: aSmallInteger
 
 	aSmallInteger < 0 ifTrue: [^self error: self canNotCreateNegativeDistanceErrorMessage]! !
+
+
+!classDefinition: #DistanciaInterval category: #'Distance-Solution'!
+Object subclass: #DistanciaInterval
+	instanceVariableNames: 'start end step intervalo'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:14:50'!
+do: aClosure
+
+intervalo do:[:each | aClosure value: each ].! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:07:03'!
+from: aStart to: anEnd by: aStep
+	
+	intervalo := Interval from:aStart to:anEnd by:aStep.! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:08:11'!
+includes: aDistance
+
+	intervalo do: [ :each | aDistance = each ifTrue:[^true]].
+	^false! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'DistanciaInterval class' category: #'Distance-Solution'!
+DistanciaInterval class
+	instanceVariableNames: ''!
+
+!DistanciaInterval class methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 00:59:39'!
+from: aStart to: anEnd by: aStep
+	
+	^ self new from: aStart to: anEnd by: aStep! !
