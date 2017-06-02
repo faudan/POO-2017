@@ -1,36 +1,218 @@
-!classDefinition: #DistanciaInterval category: #'Distance-Solution'!
-SequenceableCollection subclass: #DistanciaInterval
-	instanceVariableNames: 'start end step intervalo'
+!classDefinition: #Distancia category: #'Distance-Solution'!
+Magnitude subclass: #Distancia
+	instanceVariableNames: 'numberOfUnits unit'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:14:50'!
-do: aClosure
-
-intervalo do:[:each | aClosure value: each ].! !
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:07:03'!
-from: aStart to: anEnd by: aStep
+!Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 20:16:33'!
+amount
 	
-	intervalo := Interval from:aStart to:anEnd by:aStep.! !
+	^numberOfUnits! !
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 01:08:11'!
-includes: aDistance
+!Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:59:13'!
+initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
 
-	intervalo do: [ :each | aDistance = each ifTrue:[^true]].
-	^false! !
+	numberOfUnits := aNumberOfUnits.
+	unit := aUnit.! !
+
+!Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:55:26'!
+initializeWithMeters: aSmallInteger 
+	
+	^self initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
+
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:01:27'!
+* aSmallInteger 
+	
+	^Distancia initializeWithMeters: self meters * aSmallInteger! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 19:59:59'!
++ aDistancia 
+	
+	^Distancia initializeWithMeters: self meters + aDistancia meters! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:01:13'!
+- aDistancia 
+	
+	^Distancia initializeWithMeters: self meters - aDistancia meters.! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:39:11'!
+/ aSmallInteger 
+
+	aSmallInteger class = Distancia ifTrue: [ ^self meters / (aSmallInteger meters) ].
+	^Distancia initializeWithMeters: self meters / aSmallInteger! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:55:54'!
+abs
+	
+	^self meters abs! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:01:32'!
+adaptToNumber: aSmallInteger andSend: aSymbol 
+	
+	^Distance initializeWithMeters: (aSmallInteger perform: aSymbol with: self meters)! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:39:36'!
+negated
+
+	^Distancia initializeWithMeters: -1 * (self meters)! !
+
+
+!Distancia methodsFor: 'comparing' stamp: 'pR 6/1/2017 20:01:41'!
+< aDistancia 
+	
+	^self meters < aDistancia meters! !
+
+!Distancia methodsFor: 'comparing' stamp: 'pR 6/1/2017 20:31:05'!
+= aDistancia 
+
+	(aDistancia isKindOf: self class) ifFalse: [^false].
+	^self meters = aDistancia meters! !
+
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:49:30'!
+asMeters
+	
+	^numberOfUnits * unit factorToBase! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:49:43'!
+meters
+	
+	^self asMeters! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 20:17:02'!
+unit
+	
+	^unit! !
+
+
+!Distancia methodsFor: 'printing' stamp: 'pR 6/1/2017 20:15:56'!
+printString
+	
+	numberOfUnits = 1 ifTrue: [ ^numberOfUnits asString, ' ', unit printString ].
+	^numberOfUnits asString, ' ', unit printString, 's'! !
+
+
+!Distancia methodsFor: 'converting' stamp: 'pR 6/1/2017 20:29:22'!
+convertTo: aUnit
+
+	^Distancia initializeScaleLike: aUnit withNumberOfUnits: self meters / aUnit factorToBase 
+! !
+
+!Distancia methodsFor: 'converting' stamp: 'pR 6/1/2017 20:37:38'!
+hash
+
+	^{'Distancia' . self meters} hash
+! !
+
+
+!Distancia methodsFor: 'intervalization' stamp: 'pR 6/1/2017 20:49:47'!
+to: aDistancia
+
+	^DistanciaInterval new from: self to: aDistancia! !
+
+!Distancia methodsFor: 'intervalization' stamp: 'pR 6/1/2017 21:18:43'!
+to: anEndingDistancia by: aStep
+
+	^DistanciaInterval new from: self to: anEndingDistancia by: aStep! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'DistanciaInterval class' category: #'Distance-Solution'!
-DistanciaInterval class
+!classDefinition: 'Distancia class' category: #'Distance-Solution'!
+Distancia class
 	instanceVariableNames: ''!
 
-!DistanciaInterval class methodsFor: 'as yet unclassified' stamp: 'df 5/30/2017 00:59:39'!
-from: aStart to: anEnd by: aStep
+!Distancia class methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:56:44'!
+withMeters: aSize
+
+	^Distancia new withMeters: aSize! !
+
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 20:03:58'!
+initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
+
+	^self new initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits! !
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 19:54:28'!
+initializeWithCentimeters: aSmallInteger 
 	
-	^ self new from: aStart to: anEnd by: aStep! !
+	^self new initializeScaleLike: centimeter withNumberOfUnits: aSmallInteger
+	! !
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 19:53:46'!
+initializeWithKilometers: aSmallInteger 
+	
+	^self new initializeScaleLike: kilometer withNumberOfUnits: aSmallInteger! !
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 20:04:33'!
+initializeWithMeters: aSmallInteger 
+	
+	^self new initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
+
+
+
+
+!classDefinition: #DistanciaInterval category: #'Distance-Solution'!
+Interval subclass: #DistanciaInterval
+	instanceVariableNames: 'myInterval startingDistance endingDistance step'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:06:50'!
+by
+
+	^step! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:17:13'!
+calculateDefaultStep: aStartingDistance with: anEndingDistance
+	| minUnit |
+	
+	(aStartingDistance unit factorToBase < anEndingDistance unit factorToBase)
+		ifTrue: [ minUnit := aStartingDistance unit ] 
+		ifFalse: [ minUnit := anEndingDistance unit ].
+
+	^Distancia initializeScaleLike: minUnit withNumberOfUnits: 1
+	
+	! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/2/2017 13:57:36'!
+do: aBlock
+
+	^myInterval do: aBlock! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:06:21'!
+from
+
+	^startingDistance! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:08:30'!
+from: aStartingDistance to: anEndingDistance
+
+	myInterval := Interval from: aStartingDistance to: anEndingDistance.
+	startingDistance := aStartingDistance.
+	endingDistance := anEndingDistance.
+	step := self calculateDefaultStep: aStartingDistance with: anEndingDistance! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:09:01'!
+from: aStartingDistance to: anEndingDistance by: aStepDistance
+
+	myInterval := Interval from: aStartingDistance to: anEndingDistance.
+	startingDistance := aStartingDistance.
+	endingDistance := anEndingDistance.
+	step := aStepDistance.! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:25:00'!
+size
+
+	^myInterval size
+! !
+
+!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:06:28'!
+to
+
+	^endingDistance! !
 
 
 !classDefinition: #DistanciaTest category: #'Distance-Solution'!
@@ -44,22 +226,6 @@ TestCase subclass: #DistanciaTest
 test01InitializeDistanceOneMeter
 	 
 	self assert: (Distancia initializeWithMeters: 1) class = Distancia! !
-
-!DistanciaTest methodsFor: 'test initialization' stamp: 'pR 5/26/2017 14:27:22'!
-test05DistanceCanNotBeNegativeWithMinus1
-	
-	self
-		should: [ Distancia initializeWithMeters: -1  ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: 'prohibido crear distancias negativas']! !
-
-!DistanciaTest methodsFor: 'test initialization' stamp: 'pR 5/26/2017 14:30:12'!
-test06DistanceCanNotBeNegativeWithMinus2
-	
-	self
-		should: [ Distancia initializeWithMeters: -2  ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: 'prohibido crear distancias negativas']! !
 
 
 !DistanciaTest methodsFor: 'test arithmetic operation +' stamp: 'pR 5/26/2017 14:12:13'!
@@ -239,61 +405,34 @@ test14FourMetersMinusThreeMetersEqualOneMeters
 	self assert: fourMeters - threeMeters = oneMeter! !
 
 
-!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 00:45:22'!
+!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:47:57'!
 test23IntervalBetweenMetersWithStepsInMeters
 	| anInterval oneMeter fourMeters totalSum |
 	
 	oneMeter := Distancia initializeWithMeters: 1.
 	fourMeters := Distancia initializeWithMeters: 4.
 	
-	anInterval := oneMeter to: fourMeters.
+	anInterval := Interval from: oneMeter to: fourMeters by: oneMeter.
 	
 	totalSum := 0.
 	anInterval do: [ :each | totalSum := totalSum + each meters ].
 	
 	self assert: totalSum = 10.! !
 
-!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 01:30:40'!
+!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:48:12'!
 test24IntervalBetweenMetersWithStepsInCentimeters
-	| oneMeter twoMeters oneCentimeter totalNumbersTraversed |
+	| anInterval oneMeter twoMeters oneCentimeter totalNumbersTraversed |
 	
 	oneMeter := Distancia initializeWithMeters: 1.
 	twoMeters := Distancia initializeWithMeters: 2.
 	oneCentimeter := Distancia initializeWithCentimeters: 1.
 	
+	anInterval := Interval from: oneMeter to: twoMeters by: oneCentimeter.
 	
-	
-	totalNumbersTraversed := 0.	oneMeter to: twoMeters by: oneCentimeter do: [ :each | totalNumbersTraversed := totalNumbersTraversed + 1 ].
+	totalNumbersTraversed := 0.
+	anInterval do: [ :each | totalNumbersTraversed := totalNumbersTraversed + 1 ].
 	
 	self assert: totalNumbersTraversed = 101.! !
-
-!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 01:09:50'!
-test25IntervalBetweenAMeterAndThreeMetersIncludesTwoMeters
-	| anInterval oneMeter twoMeters threeMeters |
-	
-	oneMeter := Distancia initializeWithMeters: 1.
-	twoMeters := Distancia initializeWithMeters: 2.
-	threeMeters := Distancia initializeWithMeters: 3.
-	
-	anInterval := oneMeter to: threeMeters.
-	
-
-	
-	self assert: (anInterval includes: twoMeters).! !
-
-!DistanciaTest methodsFor: 'test interval' stamp: 'df 5/30/2017 01:17:08'!
-test26IntervalBetweenAMeterAndThreeMetersDoesNotIncludeOneAndAHalfMeters
-	| anInterval oneMeter threeMeters oneAndAHalfMeters |
-	
-	oneMeter := Distancia initializeWithMeters: 1.
-	oneAndAHalfMeters := Distancia initializeWithMeters: 1.5.
-	threeMeters := Distancia initializeWithMeters: 3.
-	
-	anInterval := oneMeter to: threeMeters.
-	
-
-	
-	self deny: (anInterval includes: oneAndAHalfMeters ).! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
@@ -339,161 +478,37 @@ zeroMeters
 	^Distancia initializeWithMeters: 0! !
 
 
-!classDefinition: #Distancia category: #'Distance-Solution'!
-Object subclass: #Distancia
-	instanceVariableNames: 'meters'
+!classDefinition: #Unit category: #'Distance-Solution'!
+Object subclass: #Unit
+	instanceVariableNames: 'factorToBase name'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Distancia methodsFor: 'initialization' stamp: 'pR 5/26/2017 15:11:36'!
-initializeScaleVsMetersLike: aScale withNumberOfUnits: aNumberOfUnits
+!Unit methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:45:26'!
+factorToBase
 
-	meters := aScale * aNumberOfUnits! !
+	^factorToBase! !
 
-!Distancia methodsFor: 'initialization' stamp: 'pR 5/26/2017 15:12:21'!
-initializeWithMeters: aSmallInteger 
-	
-	self initializeScaleVsMetersLike: 1 withNumberOfUnits: aSmallInteger! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:43:06'!
+printString
 
+	^name! !
 
-!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 5/26/2017 14:33:59'!
-* aSmallInteger 
-	
-	^Distancia initializeWithMeters: meters * aSmallInteger! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:43:22'!
+withName: aString withConversionFactorToBase: aNumber
 
-!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 5/26/2017 14:23:50'!
-+ aDistancia 
-	
-	^Distancia initializeWithMeters: meters + aDistancia meters! !
-
-!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 5/26/2017 14:46:44'!
-- aDistancia 
-	
-	^Distancia initializeWithMeters: meters - aDistancia meters.! !
-
-!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 5/26/2017 15:37:52'!
-/ aSmallInteger 
-	aSmallInteger class = Distancia ifTrue: [ ^meters / (aSmallInteger meters) ].
-	^Distancia initializeWithMeters: meters / aSmallInteger! !
-
-!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 5/26/2017 14:37:57'!
-adaptToNumber: aSmallInteger andSend: aSymbol 
-	
-	^Distance initializeWithMeters: (aSmallInteger perform: aSymbol with: meters)! !
-
-
-!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 15:02:03'!
-< aDistancia 
-	
-	^meters < aDistancia meters! !
-
-!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 15:01:26'!
-<= aDistancia 
-	
-	^meters <= aDistancia meters! !
-
-!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 14:17:40'!
-= aDistancia
-
-	^meters = aDistancia meters! !
-
-!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 14:57:28'!
-> aDistancia 
-	
-	^meters > aDistancia meters! !
-
-!Distancia methodsFor: 'comparing' stamp: 'pR 5/26/2017 14:58:56'!
->= aDistancia 
-	
-	^meters >= aDistancia meters! !
-
-
-!Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 15:25:43'!
-abs
-	
-	^meters! !
-
-!Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 15:28:14'!
-isZero
-	
-	^meters = 0! !
-
-!Distancia methodsFor: 'accessing' stamp: 'pR 5/26/2017 14:17:08'!
-meters
-	
-	^meters! !
-
-
-!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:47:30'!
-to: aDistance
-
-| unMetro |
-unMetro := Distancia initializeWithMeters: 1.
-^self to: aDistance by: unMetro.! !
-
-!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:05:24'!
-to: aDistance by: aStep
-
-^DistanciaInterval from: self to: aDistance by: aStep.! !
-
-!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:29:55'!
-to: aDistance by: aStep do: aClosure
-
-| anInterval |
-anInterval := DistanciaInterval from: self to: aDistance by: aStep.
-
-anInterval do: aClosure.! !
-
-!Distancia methodsFor: 'intervalization' stamp: 'df 5/30/2017 01:33:25'!
-to: aDistance do: aClosure
-
-| unMetro |
-unMetro := Distancia initializeWithMeters: 1.
-self to: aDistance by: unMetro do: aClosure.! !
+	name := aString.
+	factorToBase := aNumber
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Distancia class' category: #'Distance-Solution'!
-Distancia class
+!classDefinition: 'Unit class' category: #'Distance-Solution'!
+Unit class
 	instanceVariableNames: ''!
 
-!Distancia class methodsFor: 'initialization' stamp: 'df 5/27/2017 21:17:08'!
-withMeters: aSize
-	^Distancia new withMeters: aSize! !
+!Unit class methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:36:41'!
+withName: aString withConversionFactorToBase: aNumber
 
-
-!Distancia class methodsFor: 'class initialization' stamp: 'pR 5/26/2017 15:15:01'!
-initializeScaleVsMetersLike: aScale withNumberOfUnits: aNumberOfUnits
-
-	self checkIsNotNegative: aNumberOfUnits.
-	^self new initializeScaleVsMetersLike: aScale withNumberOfUnits: aNumberOfUnits! !
-
-!Distancia class methodsFor: 'class initialization' stamp: 'pR 5/26/2017 15:14:26'!
-initializeWithCentimeters: aSmallInteger 
-	
-	^self new initializeScaleVsMetersLike: 0.01 withNumberOfUnits: aSmallInteger
-	! !
-
-!Distancia class methodsFor: 'class initialization' stamp: 'pR 5/26/2017 15:16:39'!
-initializeWithKilometers: aSmallInteger 
-	
-	^self new initializeScaleVsMetersLike: 1000 withNumberOfUnits: aSmallInteger! !
-
-!Distancia class methodsFor: 'class initialization' stamp: 'pR 5/26/2017 15:14:53'!
-initializeWithMeters: aSmallInteger 
-	
-	self checkIsNotNegative: aSmallInteger.
-	^self new initializeScaleVsMetersLike: 1 withNumberOfUnits: aSmallInteger! !
-
-
-!Distancia class methodsFor: 'error messages' stamp: 'pR 5/26/2017 14:29:45'!
-canNotCreateNegativeDistanceErrorMessage
-	
-	^'prohibido crear distancias negativas'! !
-
-
-!Distancia class methodsFor: 'checking' stamp: 'pR 5/26/2017 15:08:00'!
-checkIsNotNegative: aSmallInteger
-
-	aSmallInteger < 0 ifTrue: [^self error: self canNotCreateNegativeDistanceErrorMessage]! !
+	^self new withName: aString withConversionFactorToBase: aNumber! !
