@@ -5,11 +5,6 @@ Magnitude subclass: #Distancia
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 20:16:33'!
-amount
-	
-	^numberOfUnits! !
-
 !Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:59:13'!
 initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
 
@@ -70,6 +65,11 @@ negated
 	(aDistancia isKindOf: self class) ifFalse: [^false].
 	^self meters = aDistancia meters! !
 
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 20:16:33'!
+amount
+	
+	^numberOfUnits! !
 
 !Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:49:30'!
 asMeters
@@ -160,12 +160,29 @@ Interval subclass: #DistanciaInterval
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:06:50'!
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:50'!
 by
 
 	^step! !
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:17:13'!
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:21'!
+from
+
+	^startingDistance! !
+
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:25:00'!
+size
+
+	^myInterval size
+! !
+
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:28'!
+to
+
+	^endingDistance! !
+
+
+!DistanciaInterval methodsFor: 'private' stamp: 'pR 6/1/2017 21:17:13'!
 calculateDefaultStep: aStartingDistance with: anEndingDistance
 	| minUnit |
 	
@@ -177,17 +194,13 @@ calculateDefaultStep: aStartingDistance with: anEndingDistance
 	
 	! !
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/2/2017 13:57:36'!
+
+!DistanciaInterval methodsFor: 'enumerating' stamp: 'pR 6/2/2017 13:57:36'!
 do: aBlock
 
 	^myInterval do: aBlock! !
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:06:21'!
-from
-
-	^startingDistance! !
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:08:30'!
+!DistanciaInterval methodsFor: 'enumerating' stamp: 'pR 6/1/2017 21:08:30'!
 from: aStartingDistance to: anEndingDistance
 
 	myInterval := Interval from: aStartingDistance to: anEndingDistance.
@@ -195,24 +208,13 @@ from: aStartingDistance to: anEndingDistance
 	endingDistance := anEndingDistance.
 	step := self calculateDefaultStep: aStartingDistance with: anEndingDistance! !
 
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:09:01'!
+!DistanciaInterval methodsFor: 'enumerating' stamp: 'pR 6/2/2017 15:49:23'!
 from: aStartingDistance to: anEndingDistance by: aStepDistance
 
-	myInterval := Interval from: aStartingDistance to: anEndingDistance.
+	myInterval := Interval from: aStartingDistance to: anEndingDistance by: aStepDistance.
 	startingDistance := aStartingDistance.
 	endingDistance := anEndingDistance.
 	step := aStepDistance.! !
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:25:00'!
-size
-
-	^myInterval size
-! !
-
-!DistanciaInterval methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 21:06:28'!
-to
-
-	^endingDistance! !
 
 
 !classDefinition: #DistanciaTest category: #'Distance-Solution'!
@@ -485,17 +487,19 @@ Object subclass: #Unit
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Unit methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:45:26'!
-factorToBase
-
-	^factorToBase! !
-
-!Unit methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:43:06'!
+!Unit methodsFor: 'printing' stamp: 'pR 6/1/2017 19:43:06'!
 printString
 
 	^name! !
 
-!Unit methodsFor: 'as yet unclassified' stamp: 'pR 6/1/2017 19:43:22'!
+
+!Unit methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:45:26'!
+factorToBase
+
+	^factorToBase! !
+
+
+!Unit methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:43:22'!
 withName: aString withConversionFactorToBase: aNumber
 
 	name := aString.
