@@ -5,70 +5,157 @@ Magnitude subclass: #Medida
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
 
-!Medida methodsFor: 'as yet unclassified' stamp: 'df 6/2/2017 23:41:39'!
-canNotPerformOperationWithDifferentTypes
-^'no se puede realizar esta operacion con medidas de diferente tipo'! !
+!Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:31:55'!
+asBaseUnits
+	
+	^numberOfUnits * unit factorToBase! !
 
-!Medida methodsFor: 'as yet unclassified' stamp: 'df 6/2/2017 23:42:58'!
-checkIfOperationCanBePerformedWith: aMeasure
+!Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:54:50'!
+isZero
 
-self class = aMeasure class ifFalse:[^'no se pueden sumar, son distintos tipos de medida']! !
+	^numberOfUnits = 0! !
 
+!Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 13:16:11'!
+numberOfUnitsInBase
 
-!Medida methodsFor: 'accessing' stamp: 'df 6/2/2017 23:27:36'!
+	^self subclassResponsibility! !
+
+!Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 13:11:07'!
 size
-^ numberOfUnits! !
+	
+	^numberOfUnits! !
 
-!Medida methodsFor: 'accessing' stamp: 'df 6/2/2017 23:27:42'!
+!Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 13:14:29'!
 unit
-^unit! !
+
+	^unit! !
 
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/2/2017 23:39:20'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 14:38:22'!
 * aNumber
 
-^ self class initializeWithAmount: self size * aNumber  Unit: self unit! !
+	self checkIfCanBeMultipliedBy: aNumber.
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/2/2017 23:43:09'!
+	^self class initializeWithAmount: self numberOfUnitsInBase * aNumber  withUnit: self base! !
+
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 14:38:08'!
 + aMeasure
 
-self checkIfOperationCanBePerformedWith: aMeasure.
-^ self class initializeWithAmount: self size + aMeasure size Unit: self unit! !
+	self checkIfCanBeAddedBy: aMeasure.
+	
+	^self class initializeWithAmount: self numberOfUnitsInBase + aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/2/2017 23:43:48'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 14:37:58'!
 - aMeasure
 
-self checkIfOperationCanBePerformedWith: aMeasure.
-^ self class initializeWithAmount: self size - aMeasure size Unit: self unit! !
+	self checkIfCanBeSubtractedBy: aMeasure.
+	
+	^self class initializeWithAmount: self numberOfUnitsInBase - aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/2/2017 23:39:28'!
-/ aNumber
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 15:00:09'!
+/ aNumberOrMeasure
+	
+	self checkIfCanBeDividedBy: aNumberOrMeasure.
+	
+	((self isKindOf: aNumberOrMeasure class) or: (aNumberOrMeasure isKindOf: self class))
+		ifTrue: [^self numberOfUnitsInBase / aNumberOrMeasure numberOfUnitsInBase].
+	
+	^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base! !
 
-^ self class initializeWithAmount: self size / aNumber  Unit: self unit! !
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 16:46:58'!
+abs
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/3/2017 00:15:59'!
+	^self numberOfUnitsInBase abs! !
+
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 13:30:51'!
 adaptToNumber: rcvr andSend: selector
 
-	selector = #* ifTrue: [^self class initializeWithAmount: self size * rcvr Unit: self unit ]! !
+	selector = #* ifTrue: [^self class initializeWithAmount: self size * rcvr withUnit: self unit ]! !
+
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 16:49:41'!
+negated
+
+	^self class initializeWithAmount: -1 * numberOfUnits withUnit: unit! !
 
 
-!Medida methodsFor: 'initializing' stamp: 'df 6/2/2017 23:22:15'!
-initializeWithAmount: anAmount Unit: aUnit
+!Medida methodsFor: 'initializing' stamp: 'pR 6/3/2017 13:31:47'!
+initializeWithAmount: anAmount withUnit: aUnit
 
-numberOfUnits:= anAmount.
-unit := aUnit! !
+	numberOfUnits:= anAmount.
+	unit := aUnit! !
 
 
-!Medida methodsFor: 'comparing' stamp: 'df 6/2/2017 23:45:02'!
+!Medida methodsFor: 'comparing' stamp: 'pR 6/3/2017 14:39:50'!
 < aMeasure
 
-self checkIfOperationCanBePerformedWith: aMeasure.
-^ self size < aMeasure size! !
+	self checkIfCanBeComparedByMinus: aMeasure.
+	
+	^self numberOfUnitsInBase < aMeasure numberOfUnitsInBase! !
 
-!Medida methodsFor: 'comparing' stamp: 'df 6/2/2017 23:38:16'!
+!Medida methodsFor: 'comparing' stamp: 'pR 6/3/2017 13:15:07'!
 = aMeasure
 
-self class = aMeasure class ifTrue:[^ self size = aMeasure size] ifFalse:[^self size = 0 and:[aMeasure size = 0]]! !
+	self class = aMeasure class 
+		ifTrue:[^ self numberOfUnitsInBase = aMeasure numberOfUnitsInBase]
+		ifFalse:[^self size = 0 and:[aMeasure size = 0]]! !
+
+
+!Medida methodsFor: 'converting' stamp: 'pR 6/3/2017 15:18:14'!
+convertTo: aUnit
+
+	self checkCanConvertFrom: self unit to: aUnit.
+
+	^self class initializeWithAmount: self numberOfUnitsInBase / aUnit factorToBase withUnit: aUnit! !
+
+!Medida methodsFor: 'converting' stamp: 'pR 6/3/2017 14:16:46'!
+hash
+
+	^{self class asString . self numberOfUnitsInBase} hash! !
+
+
+!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 15:23:01'!
+checkCanConvertFrom: aUnit to: anotherUnit.
+
+	aUnit measurableClass = anotherUnit measurableClass ifFalse: [^self error: self class canOnlyConvertBetweenUnitsOnSameMeasure]! !
+
+!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:52:18'!
+checkIfCanBeAddedBy: aMeasure
+
+	((self isKindOf: aMeasure class) or: (aMeasure isKindOf: self class))
+		ifFalse: [^self error: self class canNotPerformOperationWithDifferentTypes]! !
+
+!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:52:14'!
+checkIfCanBeComparedByMinus: aMeasure
+
+	((self isKindOf: aMeasure class) or: (aMeasure isKindOf: self class)) 
+		ifFalse: [^self error: self class canNotPerformOperationWithDifferentTypes]! !
+
+!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:47:41'!
+checkIfCanBeDividedBy: aNumberOrMeasure
+
+	(self isKindOf: aNumberOrMeasure class) ifTrue: [ ^self numberOfUnitsInBase / (aNumberOrMeasure numberOfUnitsInBase) ].
+	aNumberOrMeasure isNumber ifFalse: [^self error: self class canOnlyPerfermDivisionWithNumbersOrMeasures].! !
+
+!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:53:31'!
+checkIfCanBeMultipliedBy: aMeasureOrNumber
+
+	aMeasureOrNumber isNumber 
+		ifTrue: [^self].
+	((self isKindOf: aMeasureOrNumber class) or: (aMeasureOrNumber isKindOf: self class))
+		ifFalse: [^self error: self class canNotPerformOperationWithDifferentTypes]! !
+
+!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:50:04'!
+checkIfCanBeSubtractedBy: aMeasure
+
+	((self isKindOf: aMeasure class) or: (aMeasure isKindOf: self class))
+		ifFalse: [^self error: self class canNotPerformOperationWithDifferentTypes]! !
+
+
+!Medida methodsFor: 'printing' stamp: 'pR 6/3/2017 14:28:48'!
+printString
+	
+	numberOfUnits = 1 ifTrue: [ ^numberOfUnits asString, ' ', unit printString ].
+	^numberOfUnits asString, ' ', unit printString, 's'! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -76,10 +163,33 @@ self class = aMeasure class ifTrue:[^ self size = aMeasure size] ifFalse:[^self 
 Medida class
 	instanceVariableNames: ''!
 
-!Medida class methodsFor: 'class initialization' stamp: 'df 6/2/2017 23:22:09'!
-initializeWithAmount: anAmount Unit: aUnit
+!Medida class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 13:41:01'!
+canNotPerformOperationWithDifferentTypes
 
-^ self new initializeWithAmount: anAmount Unit: aUnit! !
+	^'no se puede realizar esta operacion con medidas de diferente tipo'! !
+
+!Medida class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 15:20:08'!
+canOnlyConvertBetweenUnitsOnSameMeasure
+
+	^'solo convertir entre unidades que miden lo mismo'! !
+
+!Medida class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 14:21:58'!
+canOnlyPerfermDivisionWithNumbersOrMeasures
+
+	^'solo se puede dividr una medida por una medida o por un numero'! !
+
+!Medida class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 13:31:18'!
+initializeWithAmount: anAmount withUnit: aUnit
+
+	^self new initializeWithAmount: anAmount withUnit: aUnit! !
+
+
+!classDefinition: #Compuesta category: #'Medidas-Solution'!
+Medida subclass: #Compuesta
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
 
 
 !classDefinition: #Distancia category: #'Medidas-Solution'!
@@ -89,17 +199,152 @@ Medida subclass: #Distancia
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
 
+!Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:59:13'!
+initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
+
+	numberOfUnits := aNumberOfUnits.
+	unit := aUnit.! !
+
+!Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:55:26'!
+initializeWithMeters: aSmallInteger 
+	
+	^self initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
+
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:01:32'!
+adaptToNumber: aSmallInteger andSend: aSymbol 
+	
+	^Distance initializeWithMeters: (aSmallInteger perform: aSymbol with: self meters)! !
+
+!Distancia methodsFor: 'arithmetic operations' stamp: 'pR 6/1/2017 20:39:36'!
+negated
+
+	^Distancia initializeWithMeters: -1 * (self meters)! !
+
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 20:16:33'!
+amount
+	
+	^numberOfUnits! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:49:30'!
+asMeters
+	
+	^numberOfUnits * unit factorToBase! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:08:14'!
+base
+	
+	^meter! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:49:43'!
+meters
+	
+	^self asMeters! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:32:47'!
+numberOfUnitsInBase
+	
+	^self asBaseUnits! !
+
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 20:17:02'!
+unit
+	
+	^unit! !
+
+
+!Distancia methodsFor: 'intervalization' stamp: 'pR 6/1/2017 20:49:47'!
+to: aDistancia
+
+	^DistanciaInterval new from: self to: aDistancia! !
+
+!Distancia methodsFor: 'intervalization' stamp: 'pR 6/1/2017 21:18:43'!
+to: anEndingDistancia by: aStep
+
+	^DistanciaInterval new from: self to: anEndingDistancia by: aStep! !
+
+
+!Distancia methodsFor: 'comparing' stamp: 'pR 6/1/2017 20:01:41'!
+< aDistancia 
+	
+	^self meters < aDistancia meters! !
+
+
+!Distancia methodsFor: 'printing' stamp: 'pR 6/1/2017 20:15:56'!
+printString
+	
+	numberOfUnits = 1 ifTrue: [ ^numberOfUnits asString, ' ', unit printString ].
+	^numberOfUnits asString, ' ', unit printString, 's'! !
+
+
+!Distancia methodsFor: 'converting' stamp: 'pR 6/1/2017 20:29:22'!
+convertTo: aUnit
+
+	^Distancia initializeScaleLike: aUnit withNumberOfUnits: self meters / aUnit factorToBase 
+! !
+
+!Distancia methodsFor: 'converting' stamp: 'pR 6/1/2017 20:37:38'!
+hash
+
+	^{'Distancia' . self meters} hash
+! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Distancia class' category: #'Medidas-Solution'!
 Distancia class
 	instanceVariableNames: ''!
 
-!Distancia class methodsFor: 'as yet unclassified' stamp: 'df 6/2/2017 23:53:39'!
-initializeWithMeters: aDistance
+!Distancia class methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:56:44'!
+withMeters: aSize
+
+	^Distancia new withMeters: aSize! !
 
 
-^self new initializeWithAmount: aDistance Unit: meter! !
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 20:03:58'!
+initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
+
+	^self new initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits! !
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 19:54:28'!
+initializeWithCentimeters: aSmallInteger 
+	
+	^self new initializeScaleLike: centimeter withNumberOfUnits: aSmallInteger
+	! !
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 19:53:46'!
+initializeWithKilometers: aSmallInteger 
+	
+	^self new initializeScaleLike: kilometer withNumberOfUnits: aSmallInteger! !
+
+!Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 20:04:33'!
+initializeWithMeters: aSmallInteger 
+	
+	^self new initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
+
+
+!classDefinition: #Peso category: #'Medidas-Solution'!
+Medida subclass: #Peso
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
+
+
+!classDefinition: #Temperatura category: #'Medidas-Solution'!
+Medida subclass: #Temperatura
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
+
+
+!classDefinition: #Tiempo category: #'Medidas-Solution'!
+Medida subclass: #Tiempo
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
 
 
 !classDefinition: #Volumen category: #'Medidas-Solution'!
@@ -109,16 +354,315 @@ Medida subclass: #Volumen
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
 
+!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:21:57'!
+asLiters
+
+	^numberOfUnits * unit factorToBase! !
+
+!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 14:08:26'!
+base
+
+	^liter! !
+
+!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:21:16'!
+numberOfUnitsInBase
+
+	^self asLiters! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Volumen class' category: #'Medidas-Solution'!
 Volumen class
 	instanceVariableNames: ''!
 
-!Volumen class methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:14:33'!
+!Volumen class methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:30:40'!
 initializeWithLiters: aVolume
 
-^self new initializeWithAmount: aVolume Unit: liter! !
+	^self new initializeWithAmount: aVolume withUnit: liter! !
+
+
+!classDefinition: #DistanciaInterval category: #'Medidas-Solution'!
+Interval subclass: #DistanciaInterval
+	instanceVariableNames: 'myInterval startingDistance endingDistance step'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
+
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:50'!
+by
+
+	^step! !
+
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:21'!
+from
+
+	^startingDistance! !
+
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:25:00'!
+size
+
+	^myInterval size
+! !
+
+!DistanciaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:28'!
+to
+
+	^endingDistance! !
+
+
+!DistanciaInterval methodsFor: 'private' stamp: 'pR 6/1/2017 21:17:13'!
+calculateDefaultStep: aStartingDistance with: anEndingDistance
+	| minUnit |
+	
+	(aStartingDistance unit factorToBase < anEndingDistance unit factorToBase)
+		ifTrue: [ minUnit := aStartingDistance unit ] 
+		ifFalse: [ minUnit := anEndingDistance unit ].
+
+	^Distancia initializeScaleLike: minUnit withNumberOfUnits: 1
+	
+	! !
+
+
+!DistanciaInterval methodsFor: 'enumerating' stamp: 'pR 6/2/2017 13:57:36'!
+do: aBlock
+
+	^myInterval do: aBlock! !
+
+!DistanciaInterval methodsFor: 'enumerating' stamp: 'pR 6/1/2017 21:08:30'!
+from: aStartingDistance to: anEndingDistance
+
+	myInterval := Interval from: aStartingDistance to: anEndingDistance.
+	startingDistance := aStartingDistance.
+	endingDistance := anEndingDistance.
+	step := self calculateDefaultStep: aStartingDistance with: anEndingDistance! !
+
+!DistanciaInterval methodsFor: 'enumerating' stamp: 'pR 6/2/2017 15:49:23'!
+from: aStartingDistance to: anEndingDistance by: aStepDistance
+
+	myInterval := Interval from: aStartingDistance to: anEndingDistance by: aStepDistance.
+	startingDistance := aStartingDistance.
+	endingDistance := anEndingDistance.
+	step := aStepDistance.! !
+
+
+!classDefinition: #DistanciaTest category: #'Medidas-Solution'!
+TestCase subclass: #DistanciaTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
+
+!DistanciaTest methodsFor: 'test initialization' stamp: 'pR 5/26/2017 14:09:47'!
+test01InitializeDistanceOneMeter
+	 
+	self assert: (Distancia initializeWithMeters: 1) class = Distancia! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation +' stamp: 'pR 5/26/2017 14:12:13'!
+test02OneMeterPlusOneMeterEqualsTwoMeters
+	| oneMeter twoMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	
+	self assert: (oneMeter + oneMeter) = twoMeters.! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation +' stamp: 'pR 5/26/2017 14:23:16'!
+test04OneMeterPlusTwoMetersEqualThreeMeters
+	| oneMeter twoMeters threeMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	threeMeters := Distancia initializeWithMeters: 3.
+	
+	self assert: (oneMeter + twoMeters) = threeMeters! !
+
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:16:03'!
+test03OneMeterDoesNotEqualTwoMeters
+	| oneMeter twoMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	
+	self deny: oneMeter = twoMeters.! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:48:33'!
+test15OneMeterEqualsOneHundredCentimeters
+	| oneMeter oneHundredCentimeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	oneHundredCentimeters := Distancia initializeWithCentimeters: 100.
+	
+	self assert: oneMeter = oneHundredCentimeters! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:50:34'!
+test16OneAndAHalfMetersEqualsOneHundredAnfFiftyCentimeters
+	| oneAndAHalfMeters oneHundredAndFiftyCentimeters |
+	
+	oneAndAHalfMeters := Distancia initializeWithMeters: 3 / 2.
+	oneHundredAndFiftyCentimeters := Distancia initializeWithCentimeters: 150.
+	
+	self assert: oneAndAHalfMeters = oneHundredAndFiftyCentimeters! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:53:38'!
+test17OneKilometerGreaterThanFiveHundredMeters
+	| oneKilometer fiveHundredMeters |
+	
+	oneKilometer := Distancia initializeWithKilometers: 1.
+	fiveHundredMeters := Distancia initializeWithMeters: 500.
+	
+	self assert: oneKilometer > fiveHundredMeters! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:57:13'!
+test19OneCentimeterNotGreaterThanOneMeter
+	| oneCentimeter oneMeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self deny: oneCentimeter > oneMeter! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 14:59:09'!
+test20OneCentimeterGreaterOrEqualThanOneCentimeter
+	| oneCentimeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	
+	self assert: oneCentimeter >= oneCentimeter! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 15:00:47'!
+test21OneCentimeterLessThanOrEqualThanOneMeter
+	| oneCentimeter oneMeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: oneCentimeter <= oneMeter! !
+
+!DistanciaTest methodsFor: 'test comparing' stamp: 'pR 5/26/2017 15:02:20'!
+test22OneCentimeterLessThanOneMeter
+	| oneCentimeter oneMeter |
+	
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: oneCentimeter < oneMeter! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:32:24'!
+test07MultiplyDistance1MeterTimesNumberThreeGivesThreeMeters
+	| oneMeter threeMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	threeMeters := Distancia initializeWithMeters: 3.
+	
+	self assert: oneMeter * 3 = threeMeters.! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:35:20'!
+test08MultiplyDistance1MeterTimesNumberTwoGivesTwoMeters
+	| oneMeter twoMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	
+	self assert: oneMeter * 2 = twoMeters.! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:35:45'!
+test09MultiplyNumberThreeTimesDistance1MeterTimesGivesThreeMeters
+	| oneMeter threeMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	threeMeters := Distancia initializeWithMeters: 3.
+	
+	self assert: 3 * oneMeter = threeMeters.! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:37:35'!
+test10MultiplyNumberTwoTimesDistance1MeterTimesGivesTwoMeters
+	| oneMeter twoMeters |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	
+	self assert: 2 * oneMeter = twoMeters.! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation *' stamp: 'pR 5/26/2017 14:55:11'!
+test18OneKilometerEqualsTwoTimesFiveHundredMeters
+	| oneKilometer fiveHundredMeters |
+	
+	oneKilometer := Distancia initializeWithKilometers: 1.
+	fiveHundredMeters := Distancia initializeWithMeters: 500.
+	
+	self assert: (2 * fiveHundredMeters) = oneKilometer! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation /' stamp: 'pR 5/26/2017 14:40:14'!
+test11FourMetersDividedByNumberTwoEqualsTwoMeters
+	| fourMeters twoMeters |
+	
+	fourMeters := Distancia initializeWithMeters: 4.
+	twoMeters := Distancia initializeWithMeters: 2.
+	
+	self assert: fourMeters / 2 = twoMeters! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation /' stamp: 'pR 5/26/2017 14:42:44'!
+test12FourMetersDividedByNumberEightEqualsHalfAMeter
+	| fourMeters halfMeter |
+	
+	fourMeters := Distancia initializeWithMeters: 4.
+	halfMeter := Distancia initializeWithMeters: 1 / 2.
+	
+	self assert: fourMeters / 8 = halfMeter! !
+
+
+!DistanciaTest methodsFor: 'test arithmetic operation -' stamp: 'pR 5/26/2017 14:44:37'!
+test13FourMetersMinusTwoMetersEqualTwoMeters
+	| fourMeters twoMeters |
+	
+	fourMeters := Distancia initializeWithMeters: 4.
+	twoMeters := Distancia initializeWithMeters:  2.
+	
+	self assert: fourMeters - twoMeters = twoMeters! !
+
+!DistanciaTest methodsFor: 'test arithmetic operation -' stamp: 'pR 5/26/2017 14:46:05'!
+test14FourMetersMinusThreeMetersEqualOneMeters
+	| fourMeters threeMeters oneMeter |
+	
+	fourMeters := Distancia initializeWithMeters: 4.
+	threeMeters := Distancia initializeWithMeters:  3.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: fourMeters - threeMeters = oneMeter! !
+
+
+!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:47:57'!
+test23IntervalBetweenMetersWithStepsInMeters
+	| anInterval oneMeter fourMeters totalSum |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	fourMeters := Distancia initializeWithMeters: 4.
+	
+	anInterval := Interval from: oneMeter to: fourMeters by: oneMeter.
+	
+	totalSum := 0.
+	anInterval do: [ :each | totalSum := totalSum + each meters ].
+	
+	self assert: totalSum = 10.! !
+
+!DistanciaTest methodsFor: 'test interval' stamp: 'pR 5/26/2017 15:48:12'!
+test24IntervalBetweenMetersWithStepsInCentimeters
+	| anInterval oneMeter twoMeters oneCentimeter totalNumbersTraversed |
+	
+	oneMeter := Distancia initializeWithMeters: 1.
+	twoMeters := Distancia initializeWithMeters: 2.
+	oneCentimeter := Distancia initializeWithCentimeters: 1.
+	
+	anInterval := Interval from: oneMeter to: twoMeters by: oneCentimeter.
+	
+	totalNumbersTraversed := 0.
+	anInterval do: [ :each | totalNumbersTraversed := totalNumbersTraversed + 1 ].
+	
+	self assert: totalNumbersTraversed = 101.! !
 
 
 !classDefinition: #MedidaTest category: #'Medidas-Solution'!
@@ -128,74 +672,178 @@ TestCase subclass: #MedidaTest
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:19:37'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:16:58'!
 test01medidasDeDistintoTipoSonDistintasAMenosQueRepresentenElCero
+	| unLitro unMetro otroLitro ceroLitros ceroMetros |
 
-| unLitro unMetro otroLitro ceroLitros ceroMetros |
-unMetro :=  Distancia initializeWithMeters: 1.
-unLitro := Volumen initializeWithLiters: 1.
-otroLitro := Volumen initializeWithLiters: 1.
-ceroMetros :=  Distancia initializeWithMeters: 0.
-ceroLitros := Volumen initializeWithLiters: 0.
+	unMetro :=  Distancia initializeWithMeters: 1.
+	unLitro := Volumen initializeWithLiters: 1.
+	otroLitro := Volumen initializeWithLiters: 1.
+	ceroMetros :=  Distancia initializeWithMeters: 0.
+	ceroLitros := Volumen initializeWithLiters: 0.
 
-self deny: unMetro = unLitro.
-self assert: unLitro = otroLitro.
-self assert: ceroMetros = ceroLitros! !
+	self deny: unMetro = unLitro.
+	self assert: unLitro = otroLitro.
+	self assert: ceroMetros = ceroLitros! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:09:42'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:23:30'!
 test02puedoSumarMedidasDelMismoTipo
+	| unLitro dosLitros |
 
-| unLitro dosLitros |
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
 
-unLitro := Volumen initializeWithLiters: 1.
-dosLitros := Volumen initializeWithLiters:2.
+	self assert: unLitro + unLitro = dosLitros.
+	self assert: unLitro + dosLitros = (dosLitros + unLitro )! !
 
-self assert: unLitro + unLitro = dosLitros.
-self assert: unLitro + dosLitros = (dosLitros + unLitro )! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:06:47'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:24:10'!
 test03puedoRestarMedidasDelMismoTipo
+	| unLitro dosLitros |
 
-| unLitro dosLitros |
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+	
+	self assert:dosLitros - unLitro = unLitro! !
 
-unLitro := Volumen initializeWithLiters: 1.
-dosLitros := Volumen initializeWithLiters:2.
-self assert:dosLitros - unLitro = unLitro! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:10:10'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:36:21'!
 test04puedoMultiplicarUnNumeroPorUnaMedida
+	| unLitro dosLitros |
 
-| unLitro dosLitros |
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+	
+	self assert: dosLitros  = (unLitro * 2).
+	self assert: (2 * unLitro) = dosLitros.
+	self assert: unLitro * 2 = (2*unLitro)! !
 
-unLitro := Volumen initializeWithLiters: 1.
-dosLitros := Volumen initializeWithLiters:2.
-self assert:dosLitros  = (unLitro * 2).
-self assert: unLitro * 2 = (2*unLitro)! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:17:04'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:23:53'!
 test05puedoDividirUnaMedidaPorUnNumero
+	| unLitro dosLitros |
 
-| unLitro dosLitros |
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
 
-unLitro := Volumen initializeWithLiters: 1.
-dosLitros := Volumen initializeWithLiters:2.
+	self assert: unLitro = (dosLitros/2)! !
 
-self assert: unLitro = (dosLitros/2)! !
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:42:19'!
+test06puedoCompararMedidasDeIgualTipo
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/3/2017 00:17:24'!
-test06puedoCompararMedidas
+	| unLitro dosLitros |
 
-| unLitro dosLitros |
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
 
-unLitro := Volumen initializeWithLiters: 1.
-dosLitros := Volumen initializeWithLiters:2.
+	self assert: unLitro = (dosLitros/2)! !
 
-self assert: unLitro = (dosLitros/2)! !
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:43:25'!
+test07puedoCompararMedidasDeDistintoTipo
+
+	| unLitro dosMetros |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	dosMetros := Distancia initializeWithMeters:2.
+
+	self deny: unLitro = dosMetros! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:42:44'!
+test08noPuedoRestarMedidasDeDistintoTipo
+	| unLitro unMetro |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	unMetro := Distancia initializeWithMeters: 1.
+	
+	self
+		should: [ unLitro - unMetro ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: Medida canNotPerformOperationWithDifferentTypes]! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:03:41'!
+test09soloPuedoDividirUnaMedidaPorNumerosOMedidas
+	| unLitro |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	
+	self
+		should: [ unLitro / 'algoQueNoEsUnaMedida' ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: unLitro class canOnlyPerfermDivisionWithNumbersOrMeasures]! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:15:08'!
+test10puedoConvertirEntreUnidadesQueMidenElMismoTipoDeMedida
+	| unLitro cienCentilitros |
+
+	unLitro := Volumen initializeWithAmount: 1 withUnit: liter.
+	cienCentilitros := Volumen initializeWithAmount: 100 withUnit: centiliter.
+	
+	self assert: (unLitro convertTo: centiliter) = cienCentilitros.! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:26:09'!
+test11soloPuedoConvertirEntreUnidadesQueMidenElMismoTipoDeMedida
+	| unLitro |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	
+	self
+		should: [ unLitro convertTo: meter ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: unLitro class canOnlyConvertBetweenUnitsOnSameMeasure]! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:29:20'!
+test12UnLitroEsDistintoQueUnMetro
+	| unLitro unMetro |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	unMetro := Distancia initializeWithMeters: 1.
+	
+	self deny: unLitro = unMetro.! !
+
+
+!classDefinition: #DistanceFactory category: #'Medidas-Solution'!
+Object subclass: #DistanceFactory
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Medidas-Solution'!
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:35'!
+minusOneMeter
+	
+	^Distancia initializeWithMeters: -1! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:29'!
+oneCentimeter
+	
+	^Distancia initializeWithCentimeters: 1! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:24'!
+oneHundredCentimeters
+	
+	^Distancia initializeWithCentimeters: 100! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:18'!
+oneMeter
+	
+	^Distancia initializeWithMeters: 1! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:56'!
+twoHundredCentimeters
+	
+	^Distancia initializeWithCentimeters: 200! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:03:15'!
+twoMeters
+	
+	^Distancia initializeWithMeters: 2! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:03:26'!
+zeroMeters
+	
+	^Distancia initializeWithMeters: 0! !
 
 
 !classDefinition: #Unit category: #'Medidas-Solution'!
 Object subclass: #Unit
-	instanceVariableNames: 'factorToBase name'
+	instanceVariableNames: 'factorToBase name measurableClass'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
@@ -211,6 +859,11 @@ factorToBase
 
 	^factorToBase! !
 
+!Unit methodsFor: 'accessing' stamp: 'pR 6/3/2017 15:23:29'!
+measurableClass
+	
+	^measurableClass! !
+
 
 !Unit methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:43:22'!
 withName: aString withConversionFactorToBase: aNumber
@@ -219,21 +872,45 @@ withName: aString withConversionFactorToBase: aNumber
 	factorToBase := aNumber
 	! !
 
+!Unit methodsFor: 'initialization' stamp: 'pR 6/3/2017 15:24:04'!
+withName: aString withConversionFactorToBase: aNumber withMeasurableClass: aClass
+
+	name := aString.
+	factorToBase := aNumber.
+	measurableClass := aClass
+	! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Unit class' category: #'Medidas-Solution'!
 Unit class
 	instanceVariableNames: ''!
 
-!Unit class methodsFor: 'class initialization' stamp: 'df 6/2/2017 23:53:26'!
+!Unit class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 17:08:33'!
 setUp
 
-Smalltalk at:#meter put: (Unit withName:'meter'  withConversionFactorToBase: 1).
-Smalltalk at:#liter put: (Unit withName:'liter'  withConversionFactorToBase: 1).
-Smalltalk at:#gram put: (Unit withName:'gram'  withConversionFactorToBase: 1).
+	Smalltalk at:#gram put: (Unit withName:'gram'  withConversionFactorToBase: 1 withMeasurableClass: Peso).
+
+	Smalltalk at:#meter put: (Unit withName:'meter'  withConversionFactorToBase: 1 withMeasurableClass: Distancia). 
+	Smalltalk at:#decimeter put: (Unit withName:'decimeter'  withConversionFactorToBase: 1 / 10 withMeasurableClass: Distancia). 
+	Smalltalk at:#centimeter put: (Unit withName:'centimeter'  withConversionFactorToBase: 1 / 100 withMeasurableClass: Distancia). 
+	Smalltalk at:#milimeter put: (Unit withName:'milimeter'  withConversionFactorToBase: 1 / 1000 withMeasurableClass: Distancia).
+	Smalltalk at:#decameter put: (Unit withName:'decameter'  withConversionFactorToBase: 10 withMeasurableClass: Distancia). 
+	Smalltalk at:#hectometer put: (Unit withName:'hectometer'  withConversionFactorToBase: 100 withMeasurableClass: Distancia). 
+	Smalltalk at:#kilometer put: (Unit withName:'kilometer'  withConversionFactorToBase: 1000 withMeasurableClass: Distancia).	
+
+	Smalltalk at:#liter put: (Unit withName: 'liter'  withConversionFactorToBase: 1 withMeasurableClass: Volumen). 
+	Smalltalk at:#deciliter put: (Unit withName:'deciliter'  withConversionFactorToBase: 1 / 10 withMeasurableClass: Volumen). 
+	Smalltalk at:#centiliter put: (Unit withName:'centiliter'  withConversionFactorToBase: 1 / 100 withMeasurableClass: Volumen). 
+	Smalltalk at:#mililiter put: (Unit withName:'mililiter'  withConversionFactorToBase: 1 / 1000 withMeasurableClass: Volumen).
+
+	Smalltalk at:#decaliter put: (Unit withName:'decaliter'  withConversionFactorToBase: 10 withMeasurableClass: Volumen). 
+	Smalltalk at:#hectoliter put: (Unit withName:'hectoliter'  withConversionFactorToBase: 100 withMeasurableClass: Volumen). 
+	Smalltalk at:#kiloliter put: (Unit withName:'kiloliter'  withConversionFactorToBase: 1000 withMeasurableClass: Volumen).
 ! !
 
-!Unit class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 19:36:41'!
-withName: aString withConversionFactorToBase: aNumber
+!Unit class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 15:24:35'!
+withName: aString withConversionFactorToBase: aNumber withMeasurableClass: aClass
 
-	^self new withName: aString withConversionFactorToBase: aNumber! !
+	^self new withName: aString withConversionFactorToBase: aNumber withMeasurableClass: aClass! !
+
