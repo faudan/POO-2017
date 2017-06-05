@@ -15,6 +15,11 @@ asBaseUnits
 	
 	^numberOfUnits * unit factorToBase! !
 
+!Medida methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:03:45'!
+base
+
+	^self subclassResponsibility! !
+
 !Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:54:50'!
 isZero
 
@@ -31,35 +36,37 @@ unit
 	^unit! !
 
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 14:38:22'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/4/2017 23:04:58'!
 * aNumber
-
 	self checkIfCanBeMultipliedBy: aNumber.
-
+	
 	^self class initializeWithAmount: self numberOfUnitsInBase * aNumber  withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/4/2017 17:45:42'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/4/2017 23:02:48'!
 + aMeasure
 
-"	self checkIfCanBeAddedBy: aMeasure."
-	self class = aMeasure class ifFalse:[^self createCollectionWith: aMeasure].
+	"self checkIfCanBeAddedBy: aMeasure."
+	
+	self class = aMeasure class ifFalse: [^Compuesta initializeWith: self and: aMeasure].
+	
 	^self class initializeWithAmount: self numberOfUnitsInBase + aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 14:37:58'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/4/2017 23:06:07'!
 - aMeasure
 
-	self checkIfCanBeSubtractedBy: aMeasure.
+	"self checkIfCanBeSubtractedBy: aMeasure."
+	self class = aMeasure class ifFalse: [^Compuesta initializeWith: self andNot: aMeasure].
 	
 	^self class initializeWithAmount: self numberOfUnitsInBase - aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 15:00:09'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/4/2017 23:09:32'!
 / aNumberOrMeasure
-	
+
 	self checkIfCanBeDividedBy: aNumberOrMeasure.
 	
 	((self isKindOf: aNumberOrMeasure class) or: (aNumberOrMeasure isKindOf: self class))
 		ifTrue: [^self numberOfUnitsInBase / aNumberOrMeasure numberOfUnitsInBase].
-	
+
 	^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base! !
 
 !Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 16:46:58'!
@@ -103,12 +110,16 @@ initializeWithAmount: anAmount withUnit: aUnit
 	
 	^self numberOfUnitsInBase < aMeasure numberOfUnitsInBase! !
 
-!Medida methodsFor: 'comparing' stamp: 'df 6/4/2017 15:45:16'!
+!Medida methodsFor: 'comparing' stamp: 'pR 6/4/2017 23:20:14'!
 = aMeasure
+	(self class = Compuesta and: (aMeasure class = Compuesta) not)
+		ifTrue: [^(self measures includes: aMeasure) and: (self measures size = 1)].
+	
+	(aMeasure class = Compuesta and: (self class = Compuesta) not)
+		ifTrue: [^(aMeasure measures includes: self) and: (aMeasure measures size = 1)].
 
-	self class = aMeasure class 
-		ifTrue:[^ self numberOfUnitsInBase = aMeasure numberOfUnitsInBase]
-		ifFalse:[^self numberOfUnitsInBase = 0 and:[aMeasure numberOfUnitsInBase = 0]]! !
+	self class = aMeasure class 		ifTrue: [^self numberOfUnitsInBase = aMeasure numberOfUnitsInBase]
+		ifFalse: [^self numberOfUnitsInBase = 0 and: [aMeasure numberOfUnitsInBase = 0] ].! !
 
 
 !Medida methodsFor: 'converting' stamp: 'pR 6/3/2017 15:18:14'!
@@ -208,10 +219,63 @@ initializeWithAmount: anAmount withUnit: aUnit
 
 !classDefinition: #Compuesta category: #'Medidas-Solution'!
 Medida subclass: #Compuesta
-	instanceVariableNames: ''
+	instanceVariableNames: 'measures'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:03:58'!
+base! !
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:47:02'!
+initializeWith: aMeasure and: anotherMeasure
+
+	measures := Set new.
+	
+	aMeasure class = Compuesta 
+		ifTrue: [aMeasure measures do: [:each | measures add: each] ]
+		ifFalse: [measures add: aMeasure].
+	
+	anotherMeasure class = Compuesta 
+		ifTrue: [anotherMeasure measures do: [:each | measures add: each] ]
+		ifFalse: [measures add: anotherMeasure].! !
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:08:55'!
+initializeWith: aMeasure andNot: anotherMeasure
+
+	measures := Set new.
+	
+	aMeasure class = Compuesta 
+		ifTrue: [aMeasure measures do: [:each | measures add: each] ]
+		ifFalse: [measures add: aMeasure].
+	
+	measures := measures select: [:each | (each = anotherMeasure) not].! !
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:45:11'!
+measures
+
+	^measures! !
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:48:04'!
+numberOfUnitsInBase
+
+	^measures! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Compuesta class' category: #'Medidas-Solution'!
+Compuesta class
+	instanceVariableNames: ''!
+
+!Compuesta class methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:44:36'!
+initializeWith: aMeasure and: anotherMeasure
+
+	^self new initializeWith: aMeasure and: anotherMeasure! !
+
+!Compuesta class methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:08:30'!
+initializeWith: aMeasure andNot: anotherMeasure
+
+	^self new initializeWith: aMeasure andNot: anotherMeasure! !
 
 
 !classDefinition: #Distancia category: #'Medidas-Solution'!
@@ -264,23 +328,6 @@ unit
 	^unit! !
 
 
-!Distancia methodsFor: 'intervalization' stamp: 'df 6/4/2017 16:23:40'!
-to: aDistancia
-
-	^MedidaInterval new from: self to: aDistancia! !
-
-!Distancia methodsFor: 'intervalization' stamp: 'df 6/4/2017 16:23:32'!
-to: anEndingDistancia by: aStep
-
-	^MedidaInterval new from: self to: anEndingDistancia by: aStep! !
-
-
-!Distancia methodsFor: 'comparing' stamp: 'pR 6/1/2017 20:01:41'!
-< aDistancia 
-	
-	^self meters < aDistancia meters! !
-
-
 !Distancia methodsFor: 'printing' stamp: 'pR 6/1/2017 20:15:56'!
 printString
 	
@@ -292,7 +339,6 @@ printString
 !classDefinition: 'Distancia class' category: #'Medidas-Solution'!
 Distancia class
 	instanceVariableNames: ''!
-
 
 !Distancia class methodsFor: 'class initialization' stamp: 'pR 6/1/2017 20:03:58'!
 initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
@@ -322,6 +368,14 @@ Medida subclass: #Peso
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
+
+!Peso methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:11'!
+base! !
+
+!Peso methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:40:15'!
+numberOfUnitsInBase
+
+	^numberOfUnits! !
 
 
 !classDefinition: #Temperatura category: #'Medidas-Solution'!
@@ -355,6 +409,11 @@ self unit = celsius ifTrue:[^ self amount + 273].
 self unit = fahrenheit ifTrue:[^(self amount + 459.67)*5/9].
 ^ self amount! !
 
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:47:39'!
+base
+
+	^kelvin! !
+
 !Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 16:12:47'!
 convertTo: aUnit
 
@@ -380,6 +439,11 @@ convertToFahrenheit
 convertToKelvin
 
 	^ Temperatura withKelvin: self asKelvin! !
+
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:47:34'!
+numberOfUnitsInBase
+
+	^ self asKelvin! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -410,6 +474,22 @@ Medida subclass: #Tiempo
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
 
+!Tiempo methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:19'!
+base
+	
+	^second! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Tiempo class' category: #'Medidas-Solution'!
+Tiempo class
+	instanceVariableNames: ''!
+
+!Tiempo class methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:40:55'!
+initializeWithSeconds: aNumberOfSeconds
+
+	^self new initializeWithAmount: aNumberOfSeconds withUnit: second! !
+
 
 !classDefinition: #Volumen category: #'Medidas-Solution'!
 Medida subclass: #Volumen
@@ -423,7 +503,7 @@ asLiters
 
 	^numberOfUnits * unit factorToBase! !
 
-!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 14:08:26'!
+!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:27'!
 base
 
 	^liter! !
@@ -447,7 +527,7 @@ initializeWithLiters: aVolume
 
 !classDefinition: #MedidaInterval category: #'Medidas-Solution'!
 Interval subclass: #MedidaInterval
-	instanceVariableNames: 'myInterval step startingMeasure endingMeasure size'
+	instanceVariableNames: 'myInterval step startingMeasure endingMeasure'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
@@ -457,15 +537,21 @@ by
 
 	^step! !
 
+!MedidaInterval methodsFor: 'accessing' stamp: 'pR 6/4/2017 22:40:56'!
+do: aBlock
+
+	^myInterval do: aBlock
+! !
+
 !MedidaInterval methodsFor: 'accessing' stamp: 'df 6/4/2017 16:25:46'!
 from
 
 	^startingMeasure! !
 
-!MedidaInterval methodsFor: 'accessing' stamp: 'df 6/4/2017 17:08:55'!
+!MedidaInterval methodsFor: 'accessing' stamp: 'pR 6/4/2017 22:37:17'!
 size
 
-	^ size 
+	^myInterval size 
 ! !
 
 !MedidaInterval methodsFor: 'accessing' stamp: 'df 6/4/2017 16:25:58'!
@@ -474,54 +560,31 @@ to
 	^endingMeasure! !
 
 
-!MedidaInterval methodsFor: 'private' stamp: 'df 6/4/2017 17:56:42'!
+!MedidaInterval methodsFor: 'private' stamp: 'pR 6/4/2017 23:10:40'!
 calculateDefaultStep: aStartingMeasure with: anEndingMeasure
 	| minUnit |
-	
 	(aStartingMeasure unit factorToBase < anEndingMeasure unit factorToBase)
 		ifTrue: [ minUnit := aStartingMeasure unit ] 
 		ifFalse: [ minUnit := anEndingMeasure unit ].
-
 	^Distancia initializeScaleLike: minUnit withNumberOfUnits: 1
-	
 	! !
 
 
-!MedidaInterval methodsFor: 'enumerating' stamp: 'df 6/4/2017 17:12:06'!
-at: i 
-	"Answer the anInteger'th element."
-
-	(i >= 1 and: [i <= size])
-		ifTrue: [
-			size=1 ifTrue: [ ^startingMeasure ].
-			^startingMeasure + ((endingMeasure -startingMeasure)/(size-1)*(i-1))]
-		ifFalse: [self errorSubscriptBounds: i]! !
-
-!MedidaInterval methodsFor: 'enumerating' stamp: 'df 6/4/2017 17:33:46'!
-do: aBlock
-
-	^1 to: size do: [ :i |
-		aBlock value:(self at: i) ]	! !
-
-!MedidaInterval methodsFor: 'enumerating' stamp: 'df 6/4/2017 17:29:12'!
+!MedidaInterval methodsFor: 'enumerating' stamp: 'pR 6/4/2017 22:38:18'!
 from: aStartingMeasure to: anEndingMeasure
 
 	myInterval := Interval from: aStartingMeasure to: anEndingMeasure .
 	startingMeasure := aStartingMeasure .
 	endingMeasure := anEndingMeasure .
-	step := self calculateDefaultStep: aStartingMeasure with: anEndingMeasure .
-	
-	size :=  (startingMeasure amount + endingMeasure amount)/step amount -1! !
+	step := self calculateDefaultStep: aStartingMeasure with: anEndingMeasure .! !
 
-!MedidaInterval methodsFor: 'enumerating' stamp: 'df 6/4/2017 17:29:54'!
+!MedidaInterval methodsFor: 'enumerating' stamp: 'pR 6/4/2017 22:38:25'!
 from: aStartingMeasure to: anEndingMeasure by: aStepMeasure
 
 	myInterval := Interval from: aStartingMeasure to: anEndingMeasure by: aStepMeasure .
 	startingMeasure := aStartingMeasure .
 	endingMeasure := anEndingMeasure .
-	step := aStepMeasure .
-	
-	size:=	 (startingMeasure amount + endingMeasure amount)/step amount -1.! !
+	step := aStepMeasure .! !
 
 
 !classDefinition: #MedidaTest category: #'Medidas-Solution'!
@@ -604,18 +667,6 @@ test07puedoCompararMedidasDeDistintoTipo
 
 	self deny: unLitro = dosMetros! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:42:44'!
-test08noPuedoRestarMedidasDeDistintoTipo
-	| unLitro unMetro |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	unMetro := Distancia initializeWithMeters: 1.
-	
-	self
-		should: [ unLitro - unMetro ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: Medida canNotPerformOperationWithDifferentTypes]! !
-
 !MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:03:41'!
 test09soloPuedoDividirUnaMedidaPorNumerosOMedidas
 	| unLitro |
@@ -689,6 +740,45 @@ test15puedoSumarMedidasDeDistintoTipo
 	
 	self assert: unLitro + unMetro = (unMetro + unLitro).! !
 
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:42:55'!
+test16puedoSumarMasDeDosMedidasDeDistintoTipo
+	| unLitro unMetro unGradoCelsius |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	unMetro := Distancia initializeWithMeters: 1.
+	
+	unGradoCelsius := Temperatura withCelsius: 1.
+	
+	self assert: unLitro + unMetro + unGradoCelsius = (unMetro + unLitro + unGradoCelsius).
+	self assert: unLitro + unMetro + unGradoCelsius = (unMetro + unGradoCelsius + unLitro).
+	self assert: unLitro + unMetro + unGradoCelsius = (unLitro + unMetro + unGradoCelsius).
+	self assert: unLitro + unMetro + unGradoCelsius = (unLitro + unGradoCelsius + unMetro).
+	self assert: unLitro + unMetro + unGradoCelsius = (unGradoCelsius + unMetro + unLitro).
+	self assert: unLitro + unMetro + unGradoCelsius = (unGradoCelsius + unMetro + unLitro).! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:15:18'!
+test17puedoRestarMasDeDosMedidasDeDistintoTipo
+	| unLitro unMetro unGradoCelsius ceroLitros|
+
+	unLitro := Volumen initializeWithLiters: 1.
+	ceroLitros := Volumen initializeWithLiters: 0.
+	unMetro := Distancia initializeWithMeters: 1.
+	unGradoCelsius := Temperatura withCelsius: 1.
+	
+	self assert: unLitro + unMetro - unGradoCelsius = (unMetro + unLitro).
+	self assert: unLitro - unLitro = ceroLitros.
+	self assert: unLitro - unMetro - unGradoCelsius = unLitro.! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:39:42'!
+test18PuedoMultiplicarMetrosSobreSegundosPorSegundosYDevuelveEnMetros
+	| unMetro diezSegundos diezMetros unSegundo |
+
+	unMetro := Distancia initializeWithMeters: 1.
+	diezSegundos := Tiempo initializeWithSeconds: 10.
+	unSegundo := Tiempo initializeWithSeconds: 1.
+	
+	self assert: unMetro / diezMetros * diezSegundos = unSegundo! !
+
 
 !classDefinition: #DistanceFactory category: #'Medidas-Solution'!
 Object subclass: #DistanceFactory
@@ -757,9 +847,8 @@ measurableClass
 	^measurableClass! !
 
 
-!Unit methodsFor: 'initialization' stamp: 'pR 6/3/2017 15:24:04'!
+!Unit methodsFor: 'initialization' stamp: 'pR 6/4/2017 22:49:26'!
 withName: aString withConversionFactorToBase: aNumber withMeasurableClass: aClass
-
 	name := aString.
 	factorToBase := aNumber.
 	measurableClass := aClass
