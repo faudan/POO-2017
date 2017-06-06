@@ -113,9 +113,10 @@ initializeWithAmount: anAmount withUnit: aUnit
 	
 	^self numberOfUnitsInBase < aMeasure numberOfUnitsInBase! !
 
-!Medida methodsFor: 'comparing' stamp: 'pR 6/6/2017 08:59:32'!
+!Medida methodsFor: 'comparing' stamp: 'pR 6/6/2017 12:47:40'!
 = aMeasure
-	self class = aMeasure class 		ifTrue: [^self numberOfUnitsInBase = aMeasure numberOfUnitsInBase]
+	(self class = aMeasure class or: self class = Compuesta or: aMeasure class = Compuesta)	
+		ifTrue: [^self numberOfUnitsInBase = aMeasure numberOfUnitsInBase]
 		ifFalse: [^self numberOfUnitsInBase = 0 and: [aMeasure numberOfUnitsInBase = 0] ].! !
 
 
@@ -224,7 +225,7 @@ Medida subclass: #Compuesta
 !Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:03:58'!
 base! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 11:51:20'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:36:43'!
 initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	numberOfUnits := 1.
@@ -244,27 +245,33 @@ initializeWith: aMeasure andSubtract: anotherMeasure
 			measures do: [:leftMeasure |
 				anotherMeasure measures do: [:rightMeasure |
 					leftMeasure class = rightMeasure class ifTrue: [
-						((leftMeasure - rightMeasure) numberOfUnitsInBase > 0) ifTrue: [ newMeasures add: leftMeasure - rightMeasure] 
+						((leftMeasure - rightMeasure) numberOfUnitsInBase = 0) not ifTrue: [ newMeasures add: leftMeasure - rightMeasure] 
 					]				
 				].
 				(classesRight includes: leftMeasure class ) ifFalse: [newMeasures add: leftMeasure].
 			].
+			anotherMeasure measures do: [:rightMeasure |
+				(classesLeft includes: rightMeasure class) ifFalse: [newMeasures add: -1 * rightMeasure]
+			].
 			measures := newMeasures.
 		]
 		ifFalse: [
-			| newMeasures |
+			| newMeasures classesLeft|
+			classesLeft := measures collect: [:each | each class].
 			newMeasures := Set new.
 			measures do: [:each | 
 				each class = anotherMeasure class 
-					ifTrue: [((each - anotherMeasure) numberOfUnitsInBase > 0) ifTrue: [newMeasures add: each - anotherMeasure] ]
+					ifTrue: [((each - anotherMeasure) numberOfUnitsInBase = 0) not ifTrue: [newMeasures add: each - anotherMeasure] ]
 					ifFalse: [newMeasures add: each].
 			].
+			(classesLeft includes: anotherMeasure class) ifFalse: [newMeasures add: -1 * anotherMeasure].
+			
 			measures := newMeasures.	
 		].
 	
 	measures size = 1 ifTrue: [^measures asArray at: 1].! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 11:46:17'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:13:12'!
 initializeWith: aMeasure andSum: anotherMeasure
 	
 	numberOfUnits := 1.
@@ -284,7 +291,7 @@ initializeWith: aMeasure andSum: anotherMeasure
 			measures do: [:leftMeasure |
 				anotherMeasure measures do: [:rightMeasure |
 					leftMeasure class = rightMeasure class ifTrue: [
-						((leftMeasure + rightMeasure) numberOfUnitsInBase > 0) ifTrue: [ newMeasures add: leftMeasure + rightMeasure] 
+						((leftMeasure + rightMeasure) numberOfUnitsInBase = 0) not ifTrue: [ newMeasures add: leftMeasure + rightMeasure] 
 					]				
 				].
 				(classesRight includes: leftMeasure class ) ifFalse: [newMeasures add: leftMeasure].
@@ -300,7 +307,7 @@ initializeWith: aMeasure andSum: anotherMeasure
 			newMeasures := Set new.
 			measures do: [:each | 
 				each class = anotherMeasure class 
-					ifTrue: [((each + anotherMeasure) numberOfUnitsInBase > 0) ifTrue: [newMeasures add: each + anotherMeasure. flag := true. ] ]
+					ifTrue: [((each + anotherMeasure) numberOfUnitsInBase = 0) not ifTrue: [newMeasures add: each + anotherMeasure. flag := true. ] ]
 					ifFalse: [newMeasures add: each].
 			].
 			flag ifFalse: [newMeasures add: anotherMeasure].
@@ -312,10 +319,14 @@ measures
 
 	^measures! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:48:04'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:45:46'!
 numberOfUnitsInBase
 
-	^measures! !
+	| x |
+	x := measures select: [:each | each amount > 0].
+	x size = 1 ifTrue: [^(x asArray at: 1) numberOfUnitsInBase].
+	^x
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -441,10 +452,17 @@ Medida subclass: #Temperatura
 	poolDictionaries: ''
 	category: 'Medidas-Solution'!
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:48:05'!
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:18:18'!
++ aTemperature
+
+	self class = aTemperature class ifFalse: [^super + aTemperature].
+	
+	^self class withCelsius: (self asCelsius + aTemperature asCelsius).! !
+
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:06:38'!
 = aTemperature
 
-^ self asKelvin = aTemperature asKelvin! !
+^ self asKelvin = (aTemperature asKelvin)! !
 
 !Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:54:18'!
 asCelsius
@@ -838,21 +856,35 @@ test18puedoRestarMasDeDosMedidasDeDistintoTipo
 	self assert: dosLitros + unMetro = (unLitro + unLitro + unMetro).
 	self assert: dosLitros + unMetro - unLitro = (unLitro + unMetro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:01:12'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:08:52'!
 test19puedoSumarYRestarCompuestas
-	| unLitro unMetro unGradoCelsius dosLitros |
+	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius |
 
 	unLitro := Volumen initializeWithLiters: 1.
 	unMetro := Distancia initializeWithMeters: 1.
-	unGradoCelsius := Temperatura withCelsius: 1.
 	dosLitros := Volumen initializeWithLiters: 2.
+	unGradoCelsius := Temperatura withCelsius: 1.
+	dosGradosCelsius := Temperatura withCelsius: 2.
 	
 	self assert: unLitro + (unMetro + unLitro) = (dosLitros + unMetro).
 	self assert: unMetro + unLitro - unMetro = unLitro.
 	self assert: unLitro + (unMetro + unLitro - unMetro) = dosLitros.
 	self assert: unLitro + (unMetro - unGradoCelsius) = (unMetro + unLitro).
-	self assert: dosLitros - (unMetro + unLitro) = unLitro.
-	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro + unGradoCelsius).! !
+	self assert: dosLitros - (unMetro + unLitro) = (unLitro - unMetro).
+	self assert: dosLitros - (unMetro - unGradoCelsius) = (dosLitros - unMetro + unGradoCelsius).
+	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro - unMetro + dosGradosCelsius convertToKelvin).! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:16:54'!
+test20temperaturasOK
+	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	unMetro := Distancia initializeWithMeters: 1.
+	dosLitros := Volumen initializeWithLiters: 2.
+	unGradoCelsius := Temperatura withCelsius: 1.
+	dosGradosCelsius := Temperatura withCelsius: 2.
+	
+	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro - unMetro + dosGradosCelsius).! !
 
 
 !classDefinition: #DistanceFactory category: #'Medidas-Solution'!
