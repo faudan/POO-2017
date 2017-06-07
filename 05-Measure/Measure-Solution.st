@@ -1,9 +1,9 @@
-!classDefinition: #Medida category: #'Medidas-Solution'!
+!classDefinition: #Medida category: #'Measures-Solution'!
 Magnitude subclass: #Medida
 	instanceVariableNames: 'numberOfUnits unit'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Medida methodsFor: 'accessing' stamp: 'df 6/4/2017 17:28:26'!
 amount
@@ -30,17 +30,23 @@ numberOfUnitsInBase
 
 	^self subclassResponsibility! !
 
-!Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 13:14:29'!
+!Medida methodsFor: 'accessing' stamp: 'pR 6/6/2017 18:51:49'!
 unit
 
 	^unit! !
 
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/4/2017 23:04:58'!
-* aNumber
-	self checkIfCanBeMultipliedBy: aNumber.
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 19:37:18'!
+* aMeasure
+
+	self class = aMeasure class ifFalse: [
+		(self isNumber not and: aMeasure isNumber not) ifTrue: [^Compuesta initializeWith: self andMultiply: aMeasure]
+	].
+	(self class = aMeasure class) ifTrue: [^Compuesta initializeWith: self andMultiply: aMeasure].
 	
-	^self class initializeWithAmount: self numberOfUnitsInBase * aNumber  withUnit: self base! !
+	self checkIfCanBeMultipliedBy: aMeasure.
+	
+	^self class initializeWithAmount: self numberOfUnitsInBase * aMeasure  withUnit: self base! !
 
 !Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 09:45:20'!
 + aMeasure
@@ -62,15 +68,17 @@ unit
 	
 	^self class initializeWithAmount: self numberOfUnitsInBase - aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/4/2017 23:09:32'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 21:10:18'!
 / aNumberOrMeasure
 
 	self checkIfCanBeDividedBy: aNumberOrMeasure.
 	
-	((self isKindOf: aNumberOrMeasure class) or: (aNumberOrMeasure isKindOf: self class))
+	(aNumberOrMeasure isNumber) ifTrue: [^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base].
+	
+	(self unit = aNumberOrMeasure unit)
 		ifTrue: [^self numberOfUnitsInBase / aNumberOrMeasure numberOfUnitsInBase].
-
-	^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base! !
+		
+	^Compuesta initializeWith: self andDivide: aNumberOrMeasure.! !
 
 !Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 16:46:58'!
 abs
@@ -150,11 +158,11 @@ checkIfCanBeComparedByMinus: aMeasure
 	((self isKindOf: aMeasure class) or: (aMeasure isKindOf: self class)) 
 		ifFalse: [^self error: self class canNotPerformOperationWithDifferentTypes]! !
 
-!Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:47:41'!
+!Medida methodsFor: 'checking' stamp: 'pR 6/6/2017 21:04:32'!
 checkIfCanBeDividedBy: aNumberOrMeasure
 
-	(self isKindOf: aNumberOrMeasure class) ifTrue: [ ^self numberOfUnitsInBase / (aNumberOrMeasure numberOfUnitsInBase) ].
-	aNumberOrMeasure isNumber ifFalse: [^self error: self class canOnlyPerfermDivisionWithNumbersOrMeasures].! !
+	((aNumberOrMeasure isKindOf: Medida) or: aNumberOrMeasure isNumber) 
+		ifFalse: [^self error: self class canOnlyPerfermDivisionWithNumbersOrMeasures].! !
 
 !Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:53:31'!
 checkIfCanBeMultipliedBy: aMeasureOrNumber
@@ -190,7 +198,7 @@ to: aMeasure by: aStep
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Medida class' category: #'Medidas-Solution'!
+!classDefinition: 'Medida class' category: #'Measures-Solution'!
 Medida class
 	instanceVariableNames: ''!
 
@@ -209,27 +217,108 @@ canOnlyPerfermDivisionWithNumbersOrMeasures
 
 	^'solo se puede dividr una medida por una medida o por un numero'! !
 
-!Medida class methodsFor: 'class initialization' stamp: 'pR 6/3/2017 13:31:18'!
+!Medida class methodsFor: 'class initialization' stamp: 'pR 6/6/2017 19:10:09'!
 initializeWithAmount: anAmount withUnit: aUnit
-
 	^self new initializeWithAmount: anAmount withUnit: aUnit! !
 
 
-!classDefinition: #Compuesta category: #'Medidas-Solution'!
+!classDefinition: #Compuesta category: #'Measures-Solution'!
 Medida subclass: #Compuesta
 	instanceVariableNames: 'measures'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:03:58'!
 base! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:36:43'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 21:40:28'!
+initializeWith: aMeasure andDivide: anotherMeasure
+	| newNumerator newDenominator newNumberOfUnits denominator2 |
+	
+	newNumerator := Bag new.
+	newDenominator := Bag new.
+	newNumberOfUnits := 1.
+	
+	aMeasure unit class = CompoundUnit
+		ifTrue: [
+			aMeasure unit unitsNumerator do: [:each | newNumerator add: each ].
+			aMeasure unit unitsDenominator do: [:each | newDenominator add: each].
+			]
+		ifFalse: [
+			newNumerator add: aMeasure unit. 
+			].
+		
+	anotherMeasure unit class = CompoundUnit
+		ifTrue: [
+			anotherMeasure unit unitsNumerator do: [:each | newDenominator add: each ].
+			anotherMeasure unit unitsDenominator do: [:each | newNumerator add: each].
+		]
+		ifFalse: [	
+			newDenominator add: anotherMeasure unit.
+			].
+		newNumberOfUnits := aMeasure amount/ anotherMeasure amount.
+		
+		
+		denominator2 := Bag new.
+		newDenominator do: [:each | newNumerator remove: each ifAbsent: [denominator2 add: each] ].
+		newDenominator  := denominator2.
+		
+		(newDenominator isEmpty and: newNumerator size = 1) 
+			ifTrue: [unit := newNumerator asArray at: 1]
+			ifFalse: [unit := CompoundUnit withNumerator: newNumerator withDenominator: newDenominator].
+		
+		numberOfUnits := newNumberOfUnits.
+		measures := Set new.
+		measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 21:40:10'!
+initializeWith: aMeasure andMultiply: anotherMeasure
+	| newNumerator newDenominator newNumberOfUnits denominator2 |
+	newNumerator := Bag new.
+	newDenominator := Bag new.
+	newNumberOfUnits := 1.
+	
+	aMeasure unit class = CompoundUnit
+		ifTrue: [
+			aMeasure unit unitsNumerator do: [:each | newNumerator add: each ].
+			aMeasure unit unitsDenominator do: [:each | newDenominator add: each].
+			aMeasure measures do: [:each | newNumberOfUnits := newNumberOfUnits * (each amount) ].
+		]
+		ifFalse: [
+			newNumerator add: aMeasure unit. 
+			newNumberOfUnits := newNumberOfUnits * aMeasure amount
+		].
+		
+	anotherMeasure unit class = CompoundUnit
+		ifTrue: [
+			anotherMeasure unit unitsNumerator do: [:each | newNumerator add: each ].
+			anotherMeasure unit unitsDenominator do: [:each | newDenominator add: each].
+			anotherMeasure measures do: [:each | newNumberOfUnits := newNumberOfUnits * (each amount)].
+		]
+		ifFalse: [	
+			newNumerator add: anotherMeasure unit.
+			newNumberOfUnits := newNumberOfUnits * anotherMeasure amount
+		].
+	
+	
+	denominator2 := Bag new.
+	newDenominator do: [:each | newNumerator remove: each ifAbsent: [denominator2 add: each] ].
+	newDenominator  := denominator2 .
+	
+	(newDenominator isEmpty and: newNumerator size = 1) 
+		ifTrue: [unit := newNumerator asOrderedCollection first]
+		ifFalse: [unit := CompoundUnit withNumerator: newNumerator withDenominator: newDenominator].
+	
+	numberOfUnits := newNumberOfUnits.
+	measures := Set new.
+	measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
+
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:52:18'!
 initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	numberOfUnits := 1.
-	unit := Compuesta.
+	unit := CompoundUnit new.
 	measures := Set new.
 	
 	aMeasure class = Compuesta 
@@ -271,11 +360,11 @@ initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	measures size = 1 ifTrue: [^measures asArray at: 1].! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:13:12'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:52:22'!
 initializeWith: aMeasure andSum: anotherMeasure
 	
 	numberOfUnits := 1.
-	unit := Compuesta.
+	unit := CompoundUnit new.
 	measures := Set new.
 	
 	aMeasure class = Compuesta
@@ -314,25 +403,43 @@ initializeWith: aMeasure andSum: anotherMeasure
 			measures := newMeasures.
 		].! !
 
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:11:30'!
+initializeWith: aMeasure andUnit: aUnit
+
+	measures := Set new.
+	measures add: aMeasure.
+	unit := aUnit.
+	numberOfUnits := 1.! !
+
 !Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:45:11'!
 measures
 
 	^measures! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 12:45:46'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:20:45'!
 numberOfUnitsInBase
 
-	| x |
-	x := measures select: [:each | each amount > 0].
-	x size = 1 ifTrue: [^(x asArray at: 1) numberOfUnitsInBase].
-	^x
+	measures size = 1 ifTrue: [^(measures asArray at: 1) numberOfUnitsInBase].
+	^measures
 	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Compuesta class' category: #'Medidas-Solution'!
+!classDefinition: 'Compuesta class' category: #'Measures-Solution'!
 Compuesta class
 	instanceVariableNames: ''!
+
+!Compuesta class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:47:38'!
+initializeWith: aMeasure andDivide: anotherMeasure
+
+	^self new initializeWith: aMeasure andDivide: anotherMeasure
+! !
+
+!Compuesta class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:43:35'!
+initializeWith: aMeasure andMultiply: anotherMeasure
+
+	^self new initializeWith: aMeasure andMultiply: anotherMeasure
+! !
 
 !Compuesta class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 09:33:06'!
 initializeWith: aMeasure andSubtract: anotherMeasure
@@ -344,13 +451,31 @@ initializeWith: aMeasure andSum: anotherMeasure
 
 	^self new initializeWith: aMeasure andSum: anotherMeasure! !
 
+!Compuesta class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:09:55'!
+initializeWith: aMeasure andUnit: aUnit
+
+	^self new initializeWith: aMeasure andUnit: aUnit! !
+
 
-!classDefinition: #Distancia category: #'Medidas-Solution'!
+!classDefinition: #Compuesta2 category: #'Measures-Solution'!
+Medida subclass: #Compuesta2
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measures-Solution'!
+
+!Compuesta2 methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:35:44'!
+numberOfUnitsInBase
+
+	^numberOfUnits! !
+
+
+!classDefinition: #Distancia category: #'Measures-Solution'!
 Medida subclass: #Distancia
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:59:13'!
 initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
@@ -403,7 +528,7 @@ printString
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Distancia class' category: #'Medidas-Solution'!
+!classDefinition: 'Distancia class' category: #'Measures-Solution'!
 Distancia class
 	instanceVariableNames: ''!
 
@@ -429,12 +554,12 @@ initializeWithMeters: aSmallInteger
 	^self new initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
 
 
-!classDefinition: #Peso category: #'Medidas-Solution'!
+!classDefinition: #Peso category: #'Measures-Solution'!
 Medida subclass: #Peso
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Peso methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:11'!
 base! !
@@ -445,24 +570,29 @@ numberOfUnitsInBase
 	^numberOfUnits! !
 
 
-!classDefinition: #Temperatura category: #'Medidas-Solution'!
+!classDefinition: #Temperatura category: #'Measures-Solution'!
 Medida subclass: #Temperatura
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:18:18'!
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:30:10'!
 + aTemperature
 
 	self class = aTemperature class ifFalse: [^super + aTemperature].
 	
-	^self class withCelsius: (self asCelsius + aTemperature asCelsius).! !
-
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:06:38'!
-= aTemperature
-
-^ self asKelvin = (aTemperature asKelvin)! !
+	(unit = kelvin and: aTemperature unit = kelvin) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	(unit = kelvin and: aTemperature unit = celsius) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	(unit = kelvin and: aTemperature unit = fahrenheit) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	
+	(unit = celsius and: aTemperature unit = celsius) ifTrue: [^self class withCelsius: (self asCelsius + aTemperature asCelsius)].
+	(unit = celsius and: aTemperature unit = kelvin) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	(unit = celsius and: aTemperature unit = fahrenheit) ifTrue: [ ^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	
+	(unit = fahrenheit and: aTemperature unit = kelvin) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	(unit = fahrenheit and: aTemperature unit = celsius) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
+	(unit = fahrenheit and: aTemperature unit = fahrenheit) ifTrue: [^self class withKelvin: (self asFahrenheit + aTemperature asFahrenheit)].! !
 
 !Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:54:18'!
 asCelsius
@@ -477,11 +607,13 @@ self unit = kelvin ifTrue:[^(self amount *9/5)-459.67].
 self unit = celsius ifTrue:[^(self amount*9/5)+32].
 ^self amount.! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:53:38'!
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 17:48:09'!
 asKelvin
-self unit = celsius ifTrue:[^ self amount + 273].
-self unit = fahrenheit ifTrue:[^(self amount + 459.67)*5/9].
-^ self amount! !
+
+	self unit = celsius ifTrue:[^ self amount + 273].
+	self unit = fahrenheit ifTrue:[^(self amount + 459.67)*5/9].
+	
+	^ self amount! !
 
 !Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:47:39'!
 base
@@ -514,39 +646,41 @@ convertToKelvin
 
 	^ Temperatura withKelvin: self asKelvin! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:47:34'!
+!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 17:43:31'!
 numberOfUnitsInBase
 
-	^ self asKelvin! !
+	^ self convertToKelvin asKelvin! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Temperatura class' category: #'Medidas-Solution'!
+!classDefinition: 'Temperatura class' category: #'Measures-Solution'!
 Temperatura class
 	instanceVariableNames: ''!
 
-!Temperatura class methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 15:53:46'!
+!Temperatura class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 17:29:02'!
 withCelsius: aTemperature
 
-^Temperatura new initializeWithAmount: aTemperature withUnit: celsius! !
+	^Temperatura new initializeWithAmount: aTemperature withUnit: celsius! !
 
 !Temperatura class methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 15:53:59'!
 withFahrenheit: aTemperature
 
 ^Temperatura new initializeWithAmount: aTemperature withUnit: fahrenheit! !
 
-!Temperatura class methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 16:17:10'!
+!Temperatura class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 17:28:45'!
 withKelvin: aTemperature
-aTemperature < 0 ifTrue:[^ self error: 'No se puede tener una temperatura negativa en kelvins'].
-^Temperatura new initializeWithAmount: aTemperature withUnit: kelvin! !
+
+	aTemperature < 0 ifTrue:[^ self error: 'No se puede tener una temperatura negativa en kelvins'].
+	
+	^Temperatura new initializeWithAmount: aTemperature withUnit: kelvin! !
 
 
-!classDefinition: #Tiempo category: #'Medidas-Solution'!
+!classDefinition: #Tiempo category: #'Measures-Solution'!
 Medida subclass: #Tiempo
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Tiempo methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:19'!
 base
@@ -555,7 +689,7 @@ base
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Tiempo class' category: #'Medidas-Solution'!
+!classDefinition: 'Tiempo class' category: #'Measures-Solution'!
 Tiempo class
 	instanceVariableNames: ''!
 
@@ -565,12 +699,12 @@ initializeWithSeconds: aNumberOfSeconds
 	^self new initializeWithAmount: aNumberOfSeconds withUnit: second! !
 
 
-!classDefinition: #Volumen category: #'Medidas-Solution'!
+!classDefinition: #Volumen category: #'Measures-Solution'!
 Medida subclass: #Volumen
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:21:57'!
 asLiters
@@ -589,7 +723,7 @@ numberOfUnitsInBase
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Volumen class' category: #'Medidas-Solution'!
+!classDefinition: 'Volumen class' category: #'Measures-Solution'!
 Volumen class
 	instanceVariableNames: ''!
 
@@ -599,12 +733,12 @@ initializeWithLiters: aVolume
 	^self new initializeWithAmount: aVolume withUnit: liter! !
 
 
-!classDefinition: #MedidaInterval category: #'Medidas-Solution'!
+!classDefinition: #MedidaInterval category: #'Measures-Solution'!
 Interval subclass: #MedidaInterval
 	instanceVariableNames: 'myInterval step startingMeasure endingMeasure'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !MedidaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:50'!
 by
@@ -661,12 +795,12 @@ from: aStartingMeasure to: anEndingMeasure by: aStepMeasure
 	step := aStepMeasure .! !
 
 
-!classDefinition: #MedidaTest category: #'Medidas-Solution'!
+!classDefinition: #MedidaTest category: #'Measures-Solution'!
 TestCase subclass: #MedidaTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:16:58'!
 test01medidasDeDistintoTipoSonDistintasAMenosQueRepresentenElCero
@@ -814,7 +948,7 @@ test15puedoSumarMedidasDeDistintoTipo
 	
 	self assert: unLitro + unMetro = (unMetro + unLitro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 10:04:38'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:08:51'!
 test16puedoSumarMasDeDosMedidasDeDistintoTipo
 	| unLitro unMetro unGradoCelsius |
 
@@ -840,7 +974,7 @@ test17medidasCompuestasEstanNormalizadas
 	
 	self assert: unLitro + unMetro + unLitro = (dosLitros + unMetro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 10:38:41'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:21:43'!
 test18puedoRestarMasDeDosMedidasDeDistintoTipo
 	| unLitro unMetro unGradoCelsius ceroLitros dosLitros |
 
@@ -850,13 +984,11 @@ test18puedoRestarMasDeDosMedidasDeDistintoTipo
 	unGradoCelsius := Temperatura withCelsius: 1.
 	dosLitros := Volumen initializeWithLiters: 2.
 	
-	self assert: unLitro + unMetro - unGradoCelsius = (unMetro + unLitro).
 	self assert: unLitro - unLitro = ceroLitros.
-	self assert: unLitro - unMetro - unGradoCelsius = unLitro.
 	self assert: dosLitros + unMetro = (unLitro + unLitro + unMetro).
 	self assert: dosLitros + unMetro - unLitro = (unLitro + unMetro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:08:52'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:21:58'!
 test19puedoSumarYRestarCompuestas
 	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius |
 
@@ -869,30 +1001,102 @@ test19puedoSumarYRestarCompuestas
 	self assert: unLitro + (unMetro + unLitro) = (dosLitros + unMetro).
 	self assert: unMetro + unLitro - unMetro = unLitro.
 	self assert: unLitro + (unMetro + unLitro - unMetro) = dosLitros.
-	self assert: unLitro + (unMetro - unGradoCelsius) = (unMetro + unLitro).
 	self assert: dosLitros - (unMetro + unLitro) = (unLitro - unMetro).
-	self assert: dosLitros - (unMetro - unGradoCelsius) = (dosLitros - unMetro + unGradoCelsius).
-	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro - unMetro + dosGradosCelsius convertToKelvin).! !
+	self assert: dosLitros - (unMetro - unGradoCelsius) = (dosLitros - unMetro + unGradoCelsius).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 13:16:54'!
-test20temperaturasOK
-	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius |
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:10:18'!
+test20temperaturasDeDistintosTiposSeSumanYRestanOK
+	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius unGradoKelvin dosGradosKelvin |
 
 	unLitro := Volumen initializeWithLiters: 1.
 	unMetro := Distancia initializeWithMeters: 1.
 	dosLitros := Volumen initializeWithLiters: 2.
 	unGradoCelsius := Temperatura withCelsius: 1.
 	dosGradosCelsius := Temperatura withCelsius: 2.
+	unGradoKelvin := Temperatura withKelvin: 1.
+	dosGradosKelvin := Temperatura withKelvin: 2.
 	
+	self assert: unGradoKelvin + unGradoKelvin = dosGradosKelvin.
 	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro - unMetro + dosGradosCelsius).! !
 
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:37:05'!
+test21InicializacionDeMedidasConProducto
+	| oneSecond tenMeters oneMeter |
+	
+	oneSecond := Tiempo initializeWithSeconds: 1.
+	tenMeters := Distancia initializeWithMeters: 10.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: (tenMeters * oneSecond) unit = (oneMeter * oneSecond) unit.
+	self assert: (tenMeters * tenMeters * oneSecond) unit = (oneSecond * tenMeters * tenMeters) unit.
+	
+	self deny: (tenMeters * oneMeter) unit = (oneSecond * oneMeter) unit.
+	self assert: (tenMeters * oneSecond) = (oneSecond * tenMeters).
+! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 21:12:01'!
+test22InicializacionDeMedidasConDivision
+	| oneSecond tenMeters oneMeter |
+	
+	oneSecond := Tiempo initializeWithSeconds: 1.
+	tenMeters := Distancia initializeWithMeters: 10.
+	oneMeter := Distancia initializeWithMeters: 1.
+	
+	self assert: (tenMeters / oneSecond * oneSecond) unit = (oneMeter) unit.
+	self assert: (oneMeter * oneMeter / (oneSecond * oneMeter)) unit = (oneMeter * oneMeter / (oneMeter * oneSecond)) unit.
+	self assert: (oneMeter * oneMeter / (oneSecond * oneMeter)) = (oneMeter * oneMeter / (oneMeter * oneSecond)).
+	
+	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) unit = ((oneMeter * oneMeter) / (oneSecond * oneSecond)) unit.
+	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) = ((oneMeter * oneMeter) / (oneSecond * oneSecond)).! !
+
 
-!classDefinition: #DistanceFactory category: #'Medidas-Solution'!
+!classDefinition: #CompoundUnit category: #'Measures-Solution'!
+Object subclass: #CompoundUnit
+	instanceVariableNames: 'unitsNumerator unitsDenominator'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measures-Solution'!
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:55:43'!
+= aCompoundUnit
+
+	self class = aCompoundUnit class ifFalse: [^false].
+	^unitsNumerator = aCompoundUnit unitsNumerator and: unitsDenominator = aCompoundUnit unitsDenominator! !
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:56:08'!
+unitsDenominator
+
+	^unitsDenominator! !
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:55:56'!
+unitsNumerator
+
+	^unitsNumerator! !
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:49:19'!
+withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
+
+	unitsNumerator := aCompoundUnit.
+	unitsDenominator := anotherCompoundUnit.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CompoundUnit class' category: #'Measures-Solution'!
+CompoundUnit class
+	instanceVariableNames: ''!
+
+!CompoundUnit class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:49:36'!
+withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
+
+	^self new withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit! !
+
+
+!classDefinition: #DistanceFactory category: #'Measures-Solution'!
 Object subclass: #DistanceFactory
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:35'!
 minusOneMeter
@@ -930,12 +1134,12 @@ zeroMeters
 	^Distancia initializeWithMeters: 0! !
 
 
-!classDefinition: #Unit category: #'Medidas-Solution'!
+!classDefinition: #Unit category: #'Measures-Solution'!
 Object subclass: #Unit
 	instanceVariableNames: 'factorToBase name measurableClass'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Medidas-Solution'!
+	category: 'Measures-Solution'!
 
 !Unit methodsFor: 'printing' stamp: 'pR 6/1/2017 19:43:06'!
 printString
@@ -963,7 +1167,7 @@ withName: aString withConversionFactorToBase: aNumber withMeasurableClass: aClas
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Unit class' category: #'Medidas-Solution'!
+!classDefinition: 'Unit class' category: #'Measures-Solution'!
 Unit class
 	instanceVariableNames: ''!
 
