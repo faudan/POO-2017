@@ -36,17 +36,17 @@ unit
 	^unit! !
 
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 19:37:18'!
+!Medida methodsFor: 'arithmetic' stamp: 'df 6/7/2017 19:09:22'!
 * aMeasure
 
 	self class = aMeasure class ifFalse: [
 		(self isNumber not and: aMeasure isNumber not) ifTrue: [^Compuesta initializeWith: self andMultiply: aMeasure]
 	].
 	(self class = aMeasure class) ifTrue: [^Compuesta initializeWith: self andMultiply: aMeasure].
-	
+	(aMeasure class = Unit) ifTrue:[^Compuesta initializeWith: self andMultiply: (1*aMeasure)]. 
 	self checkIfCanBeMultipliedBy: aMeasure.
 	
-	^self class initializeWithAmount: self numberOfUnitsInBase * aMeasure  withUnit: self base! !
+	^self class initializeWithAmount: self numberOfUnitsInBase * aMeasure  withUnit: self unit! !
 
 !Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 09:45:20'!
 + aMeasure
@@ -68,16 +68,16 @@ unit
 	
 	^self class initializeWithAmount: self numberOfUnitsInBase - aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 21:10:18'!
+!Medida methodsFor: 'arithmetic' stamp: 'df 6/7/2017 19:09:55'!
 / aNumberOrMeasure
 
-	self checkIfCanBeDividedBy: aNumberOrMeasure.
-	
+
+	(aNumberOrMeasure class = Unit or: aNumberOrMeasure class = CompoundUnit ) ifTrue:[^Compuesta initializeWith: self andDivide: 1*aNumberOrMeasure]. 
 	(aNumberOrMeasure isNumber) ifTrue: [^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base].
-	
+	self checkIfCanBeDividedBy: aNumberOrMeasure.	
 	(self unit = aNumberOrMeasure unit)
 		ifTrue: [^self numberOfUnitsInBase / aNumberOrMeasure numberOfUnitsInBase].
-		
+
 	^Compuesta initializeWith: self andDivide: aNumberOrMeasure.! !
 
 !Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 16:46:58'!
@@ -158,10 +158,10 @@ checkIfCanBeComparedByMinus: aMeasure
 	((self isKindOf: aMeasure class) or: (aMeasure isKindOf: self class)) 
 		ifFalse: [^self error: self class canNotPerformOperationWithDifferentTypes]! !
 
-!Medida methodsFor: 'checking' stamp: 'pR 6/6/2017 21:04:32'!
+!Medida methodsFor: 'checking' stamp: 'df 6/7/2017 17:30:01'!
 checkIfCanBeDividedBy: aNumberOrMeasure
 
-	((aNumberOrMeasure isKindOf: Medida) or: aNumberOrMeasure isNumber) 
+	((aNumberOrMeasure isKindOf: Medida) or: aNumberOrMeasure isNumber or: [aNumberOrMeasure isKindOf: Unit]) 
 		ifFalse: [^self error: self class canOnlyPerfermDivisionWithNumbersOrMeasures].! !
 
 !Medida methodsFor: 'checking' stamp: 'pR 6/3/2017 14:53:31'!
@@ -229,10 +229,23 @@ Medida subclass: #Compuesta
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 16:24:06'!
+*aMultiplier
+
+
+
+	aMultiplier isNumber ifTrue: [| aSetOfMeasures |
+									aSetOfMeasures := Set new.
+									measures do: [:each |  aSetOfMeasures add: (each*aMultiplier ) ].
+									^Compuesta initializeWith: aSetOfMeasures andUnit: self unit
+									].
+	^Compuesta initializeWith: self andMultiply: aMultiplier.
+						! !
+
 !Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:03:58'!
 base! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 21:40:28'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:24:49'!
 initializeWith: aMeasure andDivide: anotherMeasure
 	| newNumerator newDenominator newNumberOfUnits denominator2 |
 	
@@ -265,14 +278,14 @@ initializeWith: aMeasure andDivide: anotherMeasure
 		newDenominator  := denominator2.
 		
 		(newDenominator isEmpty and: newNumerator size = 1) 
-			ifTrue: [unit := newNumerator asArray at: 1]
+			ifTrue: [unit := newNumerator asOrderedCollection first]
 			ifFalse: [unit := CompoundUnit withNumerator: newNumerator withDenominator: newDenominator].
 		
 		numberOfUnits := newNumberOfUnits.
 		measures := Set new.
 		measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 21:40:10'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:25:06'!
 initializeWith: aMeasure andMultiply: anotherMeasure
 	| newNumerator newDenominator newNumberOfUnits denominator2 |
 	newNumerator := Bag new.
@@ -309,7 +322,7 @@ initializeWith: aMeasure andMultiply: anotherMeasure
 	(newDenominator isEmpty and: newNumerator size = 1) 
 		ifTrue: [unit := newNumerator asOrderedCollection first]
 		ifFalse: [unit := CompoundUnit withNumerator: newNumerator withDenominator: newDenominator].
-	
+						
 	numberOfUnits := newNumberOfUnits.
 	measures := Set new.
 	measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
@@ -403,11 +416,14 @@ initializeWith: aMeasure andSum: anotherMeasure
 			measures := newMeasures.
 		].! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:11:30'!
+!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 16:19:30'!
 initializeWith: aMeasure andUnit: aUnit
-
-	measures := Set new.
-	measures add: aMeasure.
+	aMeasure class = Set
+		ifTrue:[measures := aMeasure]
+		ifFalse:[
+			measures := Set new.
+			measures add: aMeasure.
+		].
 	unit := aUnit.
 	numberOfUnits := 1.! !
 
@@ -463,6 +479,13 @@ Medida subclass: #Compuesta2
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
+
+!Compuesta2 methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:57:36'!
++ aMeasure
+
+
+self unit = aMeasure unit ifTrue:[^ self class initializeWithAmount: self numberOfUnitsInBase + aMeasure numberOfUnitsInBase withUnit: self unit ].
+^Compuesta initializeWith: self andSum: aMeasure! !
 
 !Compuesta2 methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:35:44'!
 numberOfUnitsInBase
@@ -686,6 +709,11 @@ Medida subclass: #Tiempo
 base
 	
 	^second! !
+
+!Tiempo methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 19:02:30'!
+numberOfUnitsInBase
+
+	^numberOfUnits/ unit ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1049,6 +1077,31 @@ test22InicializacionDeMedidasConDivision
 	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) unit = ((oneMeter * oneMeter) / (oneSecond * oneSecond)) unit.
 	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) = ((oneMeter * oneMeter) / (oneSecond * oneSecond)).! !
 
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 19:11:55'!
+test23InicializacionDeMedidasMultiplicandoODividiendoNumerosPorUnidades
+
+| dosMetros unSegundo velocidad cincoMetrosPorSegundo |
+
+dosMetros := 2* meter.
+unSegundo := 1*second.
+velocidad := 2*meter/unSegundo.
+cincoMetrosPorSegundo := (10*meter)/(2*second).
+
+self assert: (dosMetros/unSegundo) unit = velocidad unit.
+self assert: dosMetros/unSegundo  = velocidad.
+self assert: cincoMetrosPorSegundo unit = velocidad unit.
+self assert: cincoMetrosPorSegundo  = (velocidad *2.5).
+self assert: (meter/second) = (velocidad unit)! !
+
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:58:21'!
+test24sumaYProductosDeUnidadesYNumeros
+
+| |
+
+self assert: (10*meter/second) + ((50*meter/(second*second))*(10*second)) = (10 * meter/second) + (500 * meter/second).
+
+! !
+
 
 !classDefinition: #CompoundUnit category: #'Measures-Solution'!
 Object subclass: #CompoundUnit
@@ -1057,11 +1110,58 @@ Object subclass: #CompoundUnit
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:55:43'!
-= aCompoundUnit
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:20:47'!
+* aUnit
 
+
+	aUnit class = Unit ifTrue: [ | units | 
+		units := Bag new.
+		units add: self.
+		units add: aUnit .
+		^CompoundUnit withNumerator: units
+		].
+	aUnit class = CompoundUnit ifTrue: [ | units unitsDem unitsNum | 
+		unitsNum := Bag new.
+		unitsDem:= Bag new.
+		unitsNum add: unitsNumerator.
+		unitsNum add: aUnit unitsNumerator.
+		unitsDem add: unitsDenominator .
+		unitsDem add: aUnit unitsDenominator .
+		^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
+		]! !
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:22:22'!
+/ aNumber
+
+	| unitsDem unitsNum |
+	unitsNum := Bag new.
+	unitsDem:= Bag new.
+	
+	aNumber class = Unit ifTrue: [	
+		unitsNum add: self.
+		unitsDem add: aNumber.
+		].
+	aNumber class = CompoundUnit ifTrue: [		
+		unitsNum add: unitsNumerator.
+		unitsNum add: aNumber unitsDenominator .
+		unitsDem add: unitsDenominator .
+		unitsDem add: aNumber unitsNumerator .
+		].
+	
+		^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
+		! !
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:21:15'!
+= aCompoundUnit
+	aCompoundUnit class = Unit ifTrue:[^(self unitsNumerator size = 1) and:[self unitsNumerator asArray at:1 = aCompoundUnit] ].
 	self class = aCompoundUnit class ifFalse: [^false].
+	
 	^unitsNumerator = aCompoundUnit unitsNumerator and: unitsDenominator = aCompoundUnit unitsDenominator! !
+
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 15:35:16'!
+adaptToNumber: rcvr andSend: selector
+
+	selector = #* ifTrue: [^Compuesta2 initializeWithAmount: rcvr withUnit: self]! !
 
 !CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:56:08'!
 unitsDenominator
@@ -1073,17 +1173,24 @@ unitsNumerator
 
 	^unitsNumerator! !
 
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:49:19'!
+!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:18:41'!
 withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
 
-	unitsNumerator := aCompoundUnit.
-	unitsDenominator := anotherCompoundUnit.! !
+(aCompoundUnit class = Bag)not ifTrue:[unitsNumerator := Bag new. unitsNumerator add: aCompoundUnit.] ifFalse:[unitsNumerator :=  aCompoundUnit.].
+(anotherCompoundUnit class = Bag)not ifTrue:[unitsDenominator := Bag new. unitsDenominator add: anotherCompoundUnit .] ifFalse:[unitsDenominator :=  anotherCompoundUnit .].
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'CompoundUnit class' category: #'Measures-Solution'!
 CompoundUnit class
 	instanceVariableNames: ''!
+
+!CompoundUnit class methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 16:06:38'!
+withNumerator: aCompoundUnit
+	| denominator |
+	denominator := Bag new.
+	^self new withNumerator: aCompoundUnit withDenominator: denominator! !
 
 !CompoundUnit class methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:49:36'!
 withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
@@ -1164,6 +1271,29 @@ withName: aString withConversionFactorToBase: aNumber withMeasurableClass: aClas
 	factorToBase := aNumber.
 	measurableClass := aClass
 	! !
+
+
+!Unit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 16:10:18'!
+* aNumber
+
+	aNumber isNumber ifTrue:	[^self measurableClass initializeWithAmount: aNumber withUnit: self].
+	aNumber class = Unit ifTrue: [ | units | 
+		units := Bag new.
+		units add: self.
+		units add: aNumber.
+		^CompoundUnit withNumerator: units
+		]! !
+
+!Unit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 16:27:00'!
+/ aNumber
+
+	aNumber isNumber ifTrue:	[^self measurableClass initializeWithAmount: 1/aNumber withUnit: self].
+	aNumber class = Unit ifTrue: [ ^CompoundUnit withNumerator: self withDenominator: aNumber]! !
+
+!Unit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 15:10:30'!
+adaptToNumber: rcvr andSend: selector
+
+	selector = #* ifTrue: [^self measurableClass initializeWithAmount: rcvr withUnit: self]! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
