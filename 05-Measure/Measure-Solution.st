@@ -231,7 +231,7 @@ Medida subclass: #Compuesta
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Compuesta methodsFor: 'initializing' stamp: 'df 6/7/2017 17:24:49'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:24:18'!
 initializeWith: aMeasure andDivide: anotherMeasure
 	| newNumerator newDenominator newNumberOfUnits denominator2 |
 	
@@ -256,7 +256,7 @@ initializeWith: aMeasure andDivide: anotherMeasure
 		ifFalse: [	
 			newDenominator add: anotherMeasure unit.
 			].
-		newNumberOfUnits := aMeasure amount/ anotherMeasure amount.
+		newNumberOfUnits := aMeasure amount / anotherMeasure amount.
 		
 		
 		denominator2 := Bag new.
@@ -269,11 +269,12 @@ initializeWith: aMeasure andDivide: anotherMeasure
 		
 		numberOfUnits := newNumberOfUnits.
 		measures := Set new.
-		measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
+		measures add: (CompuestaProdYDiv initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
 
-!Compuesta methodsFor: 'initializing' stamp: 'df 6/7/2017 17:25:06'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:25:19'!
 initializeWith: aMeasure andMultiply: anotherMeasure
 	| newNumerator newDenominator newNumberOfUnits denominator2 |
+	
 	newNumerator := Bag new.
 	newDenominator := Bag new.
 	newNumberOfUnits := 1.
@@ -311,13 +312,13 @@ initializeWith: aMeasure andMultiply: anotherMeasure
 						
 	numberOfUnits := newNumberOfUnits.
 	measures := Set new.
-	measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
+	measures add: (CompuestaProdYDiv initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
 
-!Compuesta methodsFor: 'initializing' stamp: 'pR 6/6/2017 18:52:18'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:52:25'!
 initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	numberOfUnits := 1.
-	unit := CompoundUnit new.
+	unit := CompoundUnitSumSubtract withSum: { aMeasure unit } asSet withSubtract: { anotherMeasure unit } asSet.
 	measures := Set new.
 	
 	aMeasure class = Compuesta 
@@ -359,11 +360,11 @@ initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	measures size = 1 ifTrue: [^measures asArray at: 1].! !
 
-!Compuesta methodsFor: 'initializing' stamp: 'pR 6/6/2017 18:52:22'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:52:39'!
 initializeWith: aMeasure andSum: anotherMeasure
 	
 	numberOfUnits := 1.
-	unit := CompoundUnit new.
+	unit := CompoundUnitSumSubtract withSum: { aMeasure unit. anotherMeasure unit} asSet withSubtract: {} asSet.
 	measures := Set new.
 	
 	aMeasure class = Compuesta
@@ -402,8 +403,9 @@ initializeWith: aMeasure andSum: anotherMeasure
 			measures := newMeasures.
 		].! !
 
-!Compuesta methodsFor: 'initializing' stamp: 'df 6/7/2017 16:19:30'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:17:59'!
 initializeWith: aMeasure andUnit: aUnit
+
 	aMeasure class = Set
 		ifTrue:[measures := aMeasure]
 		ifFalse:[
@@ -475,19 +477,18 @@ initializeWith: aMeasure andUnit: aUnit
 	^self new initializeWith: aMeasure andUnit: aUnit! !
 
 
-!classDefinition: #Compuesta2 category: #'Measures-Solution'!
-Medida subclass: #Compuesta2
+!classDefinition: #CompuestaProdYDiv category: #'Measures-Solution'!
+Medida subclass: #CompuestaProdYDiv
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Compuesta2 methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:39:43'!
+!CompuestaProdYDiv methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 13:24:54'!
 base
+! !
 
-	! !
-
-!Compuesta2 methodsFor: 'accessing' stamp: 'pR 6/6/2017 20:35:44'!
+!CompuestaProdYDiv methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 13:25:04'!
 numberOfUnitsInBase
 
 	^numberOfUnits! !
@@ -815,7 +816,57 @@ TestCase subclass: #MedidaTest
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:16:58'!
+!MedidaTest methodsFor: 'tests aritmetica mismo tipo' stamp: 'pR 6/3/2017 13:23:30'!
+test02puedoSumarMedidasDelMismoTipo
+	| unLitro dosLitros |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+
+	self assert: unLitro + unLitro = dosLitros.
+	self assert: unLitro + dosLitros = (dosLitros + unLitro )! !
+
+!MedidaTest methodsFor: 'tests aritmetica mismo tipo' stamp: 'pR 6/3/2017 13:24:10'!
+test03puedoRestarMedidasDelMismoTipo
+	| unLitro dosLitros |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+	
+	self assert:dosLitros - unLitro = unLitro! !
+
+!MedidaTest methodsFor: 'tests aritmetica mismo tipo' stamp: 'pR 6/3/2017 13:36:21'!
+test04puedoMultiplicarUnNumeroPorUnaMedida
+	| unLitro dosLitros |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+	
+	self assert: dosLitros  = (unLitro * 2).
+	self assert: (2 * unLitro) = dosLitros.
+	self assert: unLitro * 2 = (2*unLitro)! !
+
+!MedidaTest methodsFor: 'tests aritmetica mismo tipo' stamp: 'pR 6/3/2017 13:23:53'!
+test05puedoDividirUnaMedidaPorUnNumero
+	| unLitro dosLitros |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+
+	self assert: unLitro = (dosLitros/2)! !
+
+!MedidaTest methodsFor: 'tests aritmetica mismo tipo' stamp: 'pR 6/3/2017 13:42:19'!
+test06puedoCompararMedidasDeIgualTipo
+
+	| unLitro dosLitros |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	dosLitros := Volumen initializeWithLiters:2.
+
+	self assert: unLitro = (dosLitros/2)! !
+
+
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/3/2017 13:16:58'!
 test01medidasDeDistintoTipoSonDistintasAMenosQueRepresentenElCero
 	| unLitro unMetro otroLitro ceroLitros ceroMetros |
 
@@ -829,56 +880,7 @@ test01medidasDeDistintoTipoSonDistintasAMenosQueRepresentenElCero
 	self assert: unLitro = otroLitro.
 	self assert: ceroMetros = ceroLitros! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:23:30'!
-test02puedoSumarMedidasDelMismoTipo
-	| unLitro dosLitros |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	dosLitros := Volumen initializeWithLiters:2.
-
-	self assert: unLitro + unLitro = dosLitros.
-	self assert: unLitro + dosLitros = (dosLitros + unLitro )! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:24:10'!
-test03puedoRestarMedidasDelMismoTipo
-	| unLitro dosLitros |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	dosLitros := Volumen initializeWithLiters:2.
-	
-	self assert:dosLitros - unLitro = unLitro! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:36:21'!
-test04puedoMultiplicarUnNumeroPorUnaMedida
-	| unLitro dosLitros |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	dosLitros := Volumen initializeWithLiters:2.
-	
-	self assert: dosLitros  = (unLitro * 2).
-	self assert: (2 * unLitro) = dosLitros.
-	self assert: unLitro * 2 = (2*unLitro)! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:23:53'!
-test05puedoDividirUnaMedidaPorUnNumero
-	| unLitro dosLitros |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	dosLitros := Volumen initializeWithLiters:2.
-
-	self assert: unLitro = (dosLitros/2)! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:42:19'!
-test06puedoCompararMedidasDeIgualTipo
-
-	| unLitro dosLitros |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	dosLitros := Volumen initializeWithLiters:2.
-
-	self assert: unLitro = (dosLitros/2)! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:43:25'!
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/3/2017 13:43:25'!
 test07puedoCompararMedidasDeDistintoTipo
 
 	| unLitro dosMetros |
@@ -888,38 +890,7 @@ test07puedoCompararMedidasDeDistintoTipo
 
 	self deny: unLitro = dosMetros! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:03:41'!
-test09soloPuedoDividirUnaMedidaPorNumerosOMedidas
-	| unLitro |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	
-	self
-		should: [ unLitro / 'algoQueNoEsUnaMedida' ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: unLitro class canOnlyPerfermDivisionWithNumbersOrMeasures]! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:15:08'!
-test10puedoConvertirEntreUnidadesQueMidenElMismoTipoDeMedida
-	| unLitro cienCentilitros |
-
-	unLitro := Volumen initializeWithAmount: 1 withUnit: liter.
-	cienCentilitros := Volumen initializeWithAmount: 100 withUnit: centiliter.
-	
-	self assert: (unLitro convertTo: centiliter) = cienCentilitros.! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:26:09'!
-test11soloPuedoConvertirEntreUnidadesQueMidenElMismoTipoDeMedida
-	| unLitro |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	
-	self
-		should: [ unLitro convertTo: meter ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [:anError | self assert: anError messageText equals: unLitro class canOnlyConvertBetweenUnitsOnSameMeasure]! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 15:29:20'!
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/3/2017 15:29:20'!
 test12UnLitroEsDistintoQueUnMetro
 	| unLitro unMetro |
 
@@ -928,31 +899,7 @@ test12UnLitroEsDistintoQueUnMetro
 	
 	self deny: unLitro = unMetro.! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 16:33:43'!
-test13puedoHacerUnIntervaloDeMedidas
-	| unLitro diezLitros intervalLitro |
-
-	unLitro := Volumen initializeWithLiters: 1.	diezLitros  := unLitro *10.
-		intervalLitro :=unLitro to: diezLitros.
-	
-	self assert: intervalLitro size = 10
-	
-	! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:35:35'!
-test14puedoHacerUnIntervaloDeMedidasQueHagaAlgo
-	| unLitro diezLitros intervalLitro totalSum |
-
-	unLitro := Volumen initializeWithLiters: 1.	diezLitros  := unLitro *10.
-		intervalLitro :=unLitro to: diezLitros.
-	totalSum := 0.
-	intervalLitro do: [ :each | totalSum := totalSum + each amount ].
-
-	self assert: totalSum = 55.
-	
-	! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 09:46:52'!
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/6/2017 09:46:52'!
 test15puedoSumarMedidasDeDistintoTipo
 	| unLitro unMetro |
 	
@@ -961,7 +908,7 @@ test15puedoSumarMedidasDeDistintoTipo
 	
 	self assert: unLitro + unMetro = (unMetro + unLitro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:08:51'!
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/6/2017 19:08:51'!
 test16puedoSumarMasDeDosMedidasDeDistintoTipo
 	| unLitro unMetro unGradoCelsius |
 
@@ -977,17 +924,7 @@ test16puedoSumarMasDeDosMedidasDeDistintoTipo
 	self assert: unLitro + unMetro + unGradoCelsius = (unGradoCelsius + unMetro + unLitro).
 	self assert: unLitro + unMetro + unGradoCelsius = (unGradoCelsius + unMetro + unLitro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 09:58:25'!
-test17medidasCompuestasEstanNormalizadas
-	| unLitro unMetro dosLitros |
-
-	unMetro := Distancia initializeWithMeters: 1.
-	dosLitros := Volumen initializeWithLiters: 2.
-	unLitro := Volumen initializeWithLiters: 1.
-	
-	self assert: unLitro + unMetro + unLitro = (dosLitros + unMetro).! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:21:43'!
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/6/2017 19:21:43'!
 test18puedoRestarMasDeDosMedidasDeDistintoTipo
 	| unLitro unMetro unGradoCelsius ceroLitros dosLitros |
 
@@ -1001,7 +938,91 @@ test18puedoRestarMasDeDosMedidasDeDistintoTipo
 	self assert: dosLitros + unMetro = (unLitro + unLitro + unMetro).
 	self assert: dosLitros + unMetro - unLitro = (unLitro + unMetro).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:21:58'!
+!MedidaTest methodsFor: 'tests aritmetica distinto tipo' stamp: 'pR 6/6/2017 18:10:18'!
+test20temperaturasDeDistintosTiposSeSumanYRestanOK
+	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius unGradoKelvin dosGradosKelvin |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	unMetro := Distancia initializeWithMeters: 1.
+	dosLitros := Volumen initializeWithLiters: 2.
+	unGradoCelsius := Temperatura withCelsius: 1.
+	dosGradosCelsius := Temperatura withCelsius: 2.
+	unGradoKelvin := Temperatura withKelvin: 1.
+	dosGradosKelvin := Temperatura withKelvin: 2.
+	
+	self assert: unGradoKelvin + unGradoKelvin = dosGradosKelvin.
+	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro - unMetro + dosGradosCelsius).! !
+
+
+!MedidaTest methodsFor: 'tests operaciones no permitidas' stamp: 'pR 6/3/2017 15:03:41'!
+test09soloPuedoDividirUnaMedidaPorNumerosOMedidas
+	| unLitro |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	
+	self
+		should: [ unLitro / 'algoQueNoEsUnaMedida' ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: unLitro class canOnlyPerfermDivisionWithNumbersOrMeasures]! !
+
+
+!MedidaTest methodsFor: 'tests conversiones' stamp: 'pR 6/3/2017 15:15:08'!
+test10puedoConvertirEntreUnidadesQueMidenElMismoTipoDeMedida
+	| unLitro cienCentilitros |
+
+	unLitro := Volumen initializeWithAmount: 1 withUnit: liter.
+	cienCentilitros := Volumen initializeWithAmount: 100 withUnit: centiliter.
+	
+	self assert: (unLitro convertTo: centiliter) = cienCentilitros.! !
+
+!MedidaTest methodsFor: 'tests conversiones' stamp: 'pR 6/3/2017 15:26:09'!
+test11soloPuedoConvertirEntreUnidadesQueMidenElMismoTipoDeMedida
+	| unLitro |
+
+	unLitro := Volumen initializeWithLiters: 1.
+	
+	self
+		should: [ unLitro convertTo: meter ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | self assert: anError messageText equals: unLitro class canOnlyConvertBetweenUnitsOnSameMeasure]! !
+
+
+!MedidaTest methodsFor: 'tests intervalos' stamp: 'df 6/4/2017 16:33:43'!
+test13puedoHacerUnIntervaloDeMedidas
+	| unLitro diezLitros intervalLitro |
+
+	unLitro := Volumen initializeWithLiters: 1.	diezLitros  := unLitro *10.
+		intervalLitro :=unLitro to: diezLitros.
+	
+	self assert: intervalLitro size = 10
+	
+	! !
+
+!MedidaTest methodsFor: 'tests intervalos' stamp: 'df 6/4/2017 17:35:35'!
+test14puedoHacerUnIntervaloDeMedidasQueHagaAlgo
+	| unLitro diezLitros intervalLitro totalSum |
+
+	unLitro := Volumen initializeWithLiters: 1.	diezLitros  := unLitro *10.
+		intervalLitro :=unLitro to: diezLitros.
+	totalSum := 0.
+	intervalLitro do: [ :each | totalSum := totalSum + each amount ].
+
+	self assert: totalSum = 55.
+	
+	! !
+
+
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/6/2017 09:58:25'!
+test17medidasCompuestasEstanNormalizadas
+	| unLitro unMetro dosLitros |
+
+	unMetro := Distancia initializeWithMeters: 1.
+	dosLitros := Volumen initializeWithLiters: 2.
+	unLitro := Volumen initializeWithLiters: 1.
+	
+	self assert: unLitro + unMetro + unLitro = (dosLitros + unMetro).! !
+
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/6/2017 19:21:58'!
 test19puedoSumarYRestarCompuestas
 	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius |
 
@@ -1017,22 +1038,7 @@ test19puedoSumarYRestarCompuestas
 	self assert: dosLitros - (unMetro + unLitro) = (unLitro - unMetro).
 	self assert: dosLitros - (unMetro - unGradoCelsius) = (dosLitros - unMetro + unGradoCelsius).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:10:18'!
-test20temperaturasDeDistintosTiposSeSumanYRestanOK
-	| unLitro unMetro unGradoCelsius dosLitros dosGradosCelsius unGradoKelvin dosGradosKelvin |
-
-	unLitro := Volumen initializeWithLiters: 1.
-	unMetro := Distancia initializeWithMeters: 1.
-	dosLitros := Volumen initializeWithLiters: 2.
-	unGradoCelsius := Temperatura withCelsius: 1.
-	dosGradosCelsius := Temperatura withCelsius: 2.
-	unGradoKelvin := Temperatura withKelvin: 1.
-	dosGradosKelvin := Temperatura withKelvin: 2.
-	
-	self assert: unGradoKelvin + unGradoKelvin = dosGradosKelvin.
-	self assert: dosLitros - (unMetro + unLitro - unGradoCelsius) + unGradoCelsius = (unLitro - unMetro + dosGradosCelsius).! !
-
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:37:05'!
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/6/2017 20:37:05'!
 test21InicializacionDeMedidasConProducto
 	| oneSecond tenMeters oneMeter |
 	
@@ -1047,7 +1053,7 @@ test21InicializacionDeMedidasConProducto
 	self assert: (tenMeters * oneSecond) = (oneSecond * tenMeters).
 ! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 21:12:01'!
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/6/2017 21:12:01'!
 test22InicializacionDeMedidasConDivision
 	| oneSecond tenMeters oneMeter |
 	
@@ -1062,7 +1068,7 @@ test22InicializacionDeMedidasConDivision
 	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) unit = ((oneMeter * oneMeter) / (oneSecond * oneSecond)) unit.
 	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) = ((oneMeter * oneMeter) / (oneSecond * oneSecond)).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/7/2017 22:17:31'!
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/7/2017 22:17:31'!
 test23InicializacionDeMedidasMultiplicandoODividiendoNumerosPorUnidades
 
 | dosMetros unSegundo dosMetrosPorSegundo cincoMetrosPorSegundo |
@@ -1078,7 +1084,7 @@ self assert: cincoMetrosPorSegundo unit = dosMetrosPorSegundo unit.
 self assert: cincoMetrosPorSegundo  = (dosMetrosPorSegundo *2.5).
 self assert: (meter/second) = (dosMetrosPorSegundo unit).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/7/2017 23:15:24'!
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/7/2017 23:15:24'!
 test24sumaYProductosDeUnidadesYNumeros
 
 self assert: (1 * meter / (1 * second)) * ((1 * second) / (1 * meter)) = 1.
@@ -1090,6 +1096,19 @@ self assert: (10 * meter / second) + ((50*meter/(second*second))*(10*second)) = 
 self assert: ((10 * meter / second) * (1 * second)) + ((50*meter/(second*second))*(10*second)*(1*second)) = (510 * meter).
 self assert: ((10 * meter / second) + ((50*meter/(second*second))*(10*second)) = (510 * meter / second)).! !
 
+!MedidaTest methodsFor: 'tests medidas compuestas' stamp: 'pR 6/8/2017 14:30:02'!
+test25lasUnidadesDeSumaDeDistintasUnidadesSonDistintas
+
+	|oneMeter oneSecond|
+	oneMeter := 1*meter.
+	oneSecond := 1*second.
+
+	self deny: (oneMeter + oneSecond ) unit = (oneSecond) unit.
+	self assert: (oneMeter + oneSecond) = ( oneSecond + oneMeter).
+	
+	self assert: ((oneMeter + oneSecond) / oneSecond) unit = ((oneSecond + oneMeter) / oneSecond) unit.
+	self assert: ((oneMeter + oneSecond) / oneSecond) = ((oneSecond + oneMeter) / oneSecond).! !
+
 
 !classDefinition: #CompoundUnit category: #'Measures-Solution'!
 Object subclass: #CompoundUnit
@@ -1098,7 +1117,7 @@ Object subclass: #CompoundUnit
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!CompoundUnit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 18:20:47'!
+!CompoundUnit methodsFor: 'arithmetic' stamp: 'pR 6/8/2017 13:36:57'!
 * aUnit
 
 
@@ -1107,7 +1126,7 @@ Object subclass: #CompoundUnit
 		units add: self.
 		units add: aUnit .
 		^CompoundUnit withNumerator: units
-		].
+	].
 	aUnit class = CompoundUnit ifTrue: [ | units unitsDem unitsNum | 
 		unitsNum := Bag new.
 		unitsDem:= Bag new.
@@ -1116,9 +1135,9 @@ Object subclass: #CompoundUnit
 		unitsDem add: unitsDenominator .
 		unitsDem add: aUnit unitsDenominator .
 		^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
-		]! !
+	]! !
 
-!CompoundUnit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 18:22:22'!
+!CompoundUnit methodsFor: 'arithmetic' stamp: 'pR 6/8/2017 13:37:05'!
 / aNumber
 
 	| unitsDem unitsNum |
@@ -1128,36 +1147,51 @@ Object subclass: #CompoundUnit
 	aNumber class = Unit ifTrue: [	
 		unitsNum add: self.
 		unitsDem add: aNumber.
-		].
+	].
 	aNumber class = CompoundUnit ifTrue: [		
 		unitsNum add: unitsNumerator.
 		unitsNum add: aNumber unitsDenominator .
 		unitsDem add: unitsDenominator .
 		unitsDem add: aNumber unitsNumerator .
-		].
+	].
 	
-		^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
+	^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
 		! !
 
-!CompoundUnit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 15:35:16'!
+!CompoundUnit methodsFor: 'arithmetic' stamp: 'pR 6/8/2017 13:30:32'!
 adaptToNumber: rcvr andSend: selector
 
-	selector = #* ifTrue: [^Compuesta2 initializeWithAmount: rcvr withUnit: self]! !
+	selector = #* ifTrue: [^CompuestaProdYDiv initializeWithAmount: rcvr withUnit: self]
+		! !
 
 
-!CompoundUnit methodsFor: 'comparing' stamp: 'df 6/7/2017 17:21:15'!
+!CompoundUnit methodsFor: 'comparing' stamp: 'pR 6/8/2017 13:23:02'!
 = aCompoundUnit
-	aCompoundUnit class = Unit ifTrue:[^(self unitsNumerator size = 1) and:[self unitsNumerator asArray at:1 = aCompoundUnit] ].
-	self class = aCompoundUnit class ifFalse: [^false].
+
+	aCompoundUnit class = Unit 
+		ifTrue:[^(self unitsNumerator size = 1) and:[self unitsNumerator asArray at:1 = aCompoundUnit] ].
+	
+	self class = aCompoundUnit class 
+		ifFalse: [^false].
 	
 	^unitsNumerator = aCompoundUnit unitsNumerator and: unitsDenominator = aCompoundUnit unitsDenominator! !
 
+!CompoundUnit methodsFor: 'comparing' stamp: 'pR 6/8/2017 14:29:37'!
+hash
 
-!CompoundUnit methodsFor: 'initializing' stamp: 'df 6/7/2017 17:18:41'!
+	^ {self class . unitsNumerator . unitsDenominator} hash! !
+
+
+!CompoundUnit methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:22:39'!
 withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
 
-(aCompoundUnit class = Bag)not ifTrue:[unitsNumerator := Bag new. unitsNumerator add: aCompoundUnit.] ifFalse:[unitsNumerator :=  aCompoundUnit.].
-(anotherCompoundUnit class = Bag)not ifTrue:[unitsDenominator := Bag new. unitsDenominator add: anotherCompoundUnit .] ifFalse:[unitsDenominator :=  anotherCompoundUnit .].
+	(aCompoundUnit class = Bag)
+		ifFalse:[unitsNumerator := Bag new. unitsNumerator add: aCompoundUnit.] 
+		ifTrue:[unitsNumerator :=  aCompoundUnit.].
+
+	(anotherCompoundUnit class = Bag)
+		ifFalse:[unitsDenominator := Bag new. unitsDenominator add: anotherCompoundUnit .] 
+		ifTrue:[unitsDenominator :=  anotherCompoundUnit .].
 	! !
 
 
@@ -1187,6 +1221,58 @@ withNumerator: aCompoundUnit
 withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
 
 	^self new withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit! !
+
+
+!classDefinition: #CompoundUnitSumSubtract category: #'Measures-Solution'!
+Object subclass: #CompoundUnitSumSubtract
+	instanceVariableNames: 'unitsSum unitsSubtract'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measures-Solution'!
+
+!CompoundUnitSumSubtract methodsFor: 'comparing' stamp: 'pR 6/8/2017 14:14:11'!
+= aCompoundUnit
+	
+	aCompoundUnit class = self class
+		ifFalse: [^false].
+	
+	^unitsSum = aCompoundUnit unitsSum and: unitsSubtract = aCompoundUnit unitsSubtract.
+! !
+
+!CompoundUnitSumSubtract methodsFor: 'comparing' stamp: 'pR 6/8/2017 14:28:35'!
+hash
+	
+	^{self class asString . self unitsSum . self unitsSubtract} hash
+! !
+
+
+!CompoundUnitSumSubtract methodsFor: 'accessing' stamp: 'pR 6/8/2017 13:44:26'!
+unitsSubtract
+
+	^unitsSubtract! !
+
+!CompoundUnitSumSubtract methodsFor: 'accessing' stamp: 'pR 6/8/2017 13:44:19'!
+unitsSum
+	
+	^unitsSum! !
+
+
+!CompoundUnitSumSubtract methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:42:58'!
+withSum: aSetOfUnits withSubtract: anotherSetOfUnits
+
+	unitsSum := aSetOfUnits.
+	unitsSubtract := anotherSetOfUnits.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CompoundUnitSumSubtract class' category: #'Measures-Solution'!
+CompoundUnitSumSubtract class
+	instanceVariableNames: ''!
+
+!CompoundUnitSumSubtract class methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 13:42:30'!
+withSum: aSetOfUnits withSubtract: anotherSetOfUnits
+
+	^self new withSum: aSetOfUnits withSubtract: anotherSetOfUnits! !
 
 
 !classDefinition: #DistanceFactory category: #'Measures-Solution'!
@@ -1253,6 +1339,11 @@ amount
 factorToBase
 
 	^factorToBase! !
+
+!Unit methodsFor: 'accessing' stamp: 'pR 6/8/2017 13:48:52'!
+isZero
+
+	^false! !
 
 !Unit methodsFor: 'accessing' stamp: 'pR 6/3/2017 15:23:29'!
 measurableClass
