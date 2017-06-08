@@ -5,9 +5,9 @@ Magnitude subclass: #Medida
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Medida methodsFor: 'accessing' stamp: 'df 6/4/2017 17:28:26'!
+!Medida methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:40:06'!
 amount
-	
+
 	^numberOfUnits! !
 
 !Medida methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:31:55'!
@@ -36,45 +36,55 @@ unit
 	^unit! !
 
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/7/2017 19:09:22'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/7/2017 23:01:01'!
 * aMeasure
 
 	self class = aMeasure class ifFalse: [
 		(self isNumber not and: aMeasure isNumber not) ifTrue: [^Compuesta initializeWith: self andMultiply: aMeasure]
 	].
+	
 	(self class = aMeasure class) ifTrue: [^Compuesta initializeWith: self andMultiply: aMeasure].
-	(aMeasure class = Unit) ifTrue:[^Compuesta initializeWith: self andMultiply: (1*aMeasure)]. 
-	self checkIfCanBeMultipliedBy: aMeasure.
 	
 	^self class initializeWithAmount: self numberOfUnitsInBase * aMeasure  withUnit: self unit! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 09:45:20'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/7/2017 23:01:09'!
 + aMeasure
 
 	"self checkIfCanBeAddedBy: aMeasure."
 	
-	self class = aMeasure class ifFalse: [^Compuesta initializeWith: self andSum: aMeasure].
-	(self class = aMeasure class and: aMeasure class = Compuesta) ifTrue: [^Compuesta initializeWith: self andSum: aMeasure].
+	self class = aMeasure class 
+		ifFalse: [^Compuesta initializeWith: self andSum: aMeasure].
+		
+	(self class = aMeasure class and: aMeasure class = Compuesta) 
+		ifTrue: [^Compuesta initializeWith: self andSum: aMeasure].
 	
 	^self class initializeWithAmount: self numberOfUnitsInBase + aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 10:37:43'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/7/2017 23:01:12'!
 - aMeasure
 
 	"self checkIfCanBeSubtractedBy: aMeasure."
 	
-	self class = aMeasure class ifFalse: [^Compuesta initializeWith: self andSubtract: aMeasure].
-	(self class = aMeasure class and: aMeasure class = Compuesta) ifTrue: [^Compuesta initializeWith: self andSubtract: aMeasure].
+	self class = aMeasure class 
+		ifFalse: [^Compuesta initializeWith: self andSubtract: aMeasure].
+		
+	(self class = aMeasure class and: aMeasure class = Compuesta) 
+		ifTrue: [^Compuesta initializeWith: self andSubtract: aMeasure].
 	
 	^self class initializeWithAmount: self numberOfUnitsInBase - aMeasure numberOfUnitsInBase withUnit: self base! !
 
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/7/2017 19:09:55'!
+!Medida methodsFor: 'arithmetic' stamp: 'pR 6/7/2017 23:01:48'!
 / aNumberOrMeasure
 
 
-	(aNumberOrMeasure class = Unit or: aNumberOrMeasure class = CompoundUnit ) ifTrue:[^Compuesta initializeWith: self andDivide: 1*aNumberOrMeasure]. 
-	(aNumberOrMeasure isNumber) ifTrue: [^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base].
-	self checkIfCanBeDividedBy: aNumberOrMeasure.	
+	(aNumberOrMeasure class = Unit or: aNumberOrMeasure class = CompoundUnit ) 
+		ifTrue:[^Compuesta initializeWith: self andDivide: 1*aNumberOrMeasure]. 
+		
+	(aNumberOrMeasure isNumber) 
+		ifTrue: [^self class initializeWithAmount: self numberOfUnitsInBase / aNumberOrMeasure  withUnit: self base].
+		
+	self checkIfCanBeDividedBy: aNumberOrMeasure.
+	
 	(self unit = aNumberOrMeasure unit)
 		ifTrue: [^self numberOfUnitsInBase / aNumberOrMeasure numberOfUnitsInBase].
 
@@ -89,17 +99,6 @@ abs
 adaptToNumber: rcvr andSend: selector
 
 	selector = #* ifTrue: [^self class initializeWithAmount: self amount * rcvr withUnit: self unit ]! !
-
-!Medida methodsFor: 'arithmetic' stamp: 'df 6/4/2017 17:42:46'!
-createCollectionWith: aMeasure
-
-| aCollection |
-aCollection := Bag new.
-
-aCollection add: self.
-aCollection add: aMeasure.
-^aCollection.
-! !
 
 !Medida methodsFor: 'arithmetic' stamp: 'pR 6/3/2017 16:49:41'!
 negated
@@ -121,10 +120,13 @@ initializeWithAmount: anAmount withUnit: aUnit
 	
 	^self numberOfUnitsInBase < aMeasure numberOfUnitsInBase! !
 
-!Medida methodsFor: 'comparing' stamp: 'pR 6/6/2017 12:47:40'!
+!Medida methodsFor: 'comparing' stamp: 'pR 6/7/2017 22:20:38'!
 = aMeasure
 	(self class = aMeasure class or: self class = Compuesta or: aMeasure class = Compuesta)	
-		ifTrue: [^self numberOfUnitsInBase = aMeasure numberOfUnitsInBase]
+		ifTrue: [
+			aMeasure isNumber ifTrue: [^self numberOfUnitsInBase = aMeasure].
+			^self numberOfUnitsInBase = aMeasure numberOfUnitsInBase
+		]
 		ifFalse: [^self numberOfUnitsInBase = 0 and: [aMeasure numberOfUnitsInBase = 0] ].! !
 
 
@@ -229,23 +231,7 @@ Medida subclass: #Compuesta
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 16:24:06'!
-*aMultiplier
-
-
-
-	aMultiplier isNumber ifTrue: [| aSetOfMeasures |
-									aSetOfMeasures := Set new.
-									measures do: [:each |  aSetOfMeasures add: (each*aMultiplier ) ].
-									^Compuesta initializeWith: aSetOfMeasures andUnit: self unit
-									].
-	^Compuesta initializeWith: self andMultiply: aMultiplier.
-						! !
-
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:03:58'!
-base! !
-
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:24:49'!
+!Compuesta methodsFor: 'initializing' stamp: 'df 6/7/2017 17:24:49'!
 initializeWith: aMeasure andDivide: anotherMeasure
 	| newNumerator newDenominator newNumberOfUnits denominator2 |
 	
@@ -285,7 +271,7 @@ initializeWith: aMeasure andDivide: anotherMeasure
 		measures := Set new.
 		measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:25:06'!
+!Compuesta methodsFor: 'initializing' stamp: 'df 6/7/2017 17:25:06'!
 initializeWith: aMeasure andMultiply: anotherMeasure
 	| newNumerator newDenominator newNumberOfUnits denominator2 |
 	newNumerator := Bag new.
@@ -327,7 +313,7 @@ initializeWith: aMeasure andMultiply: anotherMeasure
 	measures := Set new.
 	measures add: (Compuesta2 initializeWithAmount: newNumberOfUnits  withUnit: unit).! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:52:18'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/6/2017 18:52:18'!
 initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	numberOfUnits := 1.
@@ -373,7 +359,7 @@ initializeWith: aMeasure andSubtract: anotherMeasure
 	
 	measures size = 1 ifTrue: [^measures asArray at: 1].! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:52:22'!
+!Compuesta methodsFor: 'initializing' stamp: 'pR 6/6/2017 18:52:22'!
 initializeWith: aMeasure andSum: anotherMeasure
 	
 	numberOfUnits := 1.
@@ -416,7 +402,7 @@ initializeWith: aMeasure andSum: anotherMeasure
 			measures := newMeasures.
 		].! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 16:19:30'!
+!Compuesta methodsFor: 'initializing' stamp: 'df 6/7/2017 16:19:30'!
 initializeWith: aMeasure andUnit: aUnit
 	aMeasure class = Set
 		ifTrue:[measures := aMeasure]
@@ -427,17 +413,33 @@ initializeWith: aMeasure andUnit: aUnit
 	unit := aUnit.
 	numberOfUnits := 1.! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:45:11'!
+
+!Compuesta methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:03:58'!
+base! !
+
+!Compuesta methodsFor: 'accessing' stamp: 'pR 6/4/2017 22:45:11'!
 measures
 
 	^measures! !
 
-!Compuesta methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:20:45'!
+!Compuesta methodsFor: 'accessing' stamp: 'pR 6/6/2017 19:20:45'!
 numberOfUnitsInBase
 
 	measures size = 1 ifTrue: [^(measures asArray at: 1) numberOfUnitsInBase].
 	^measures
 	! !
+
+
+!Compuesta methodsFor: 'arithmetic' stamp: 'pR 6/7/2017 22:59:35'!
+* aMultiplier
+
+	aMultiplier isNumber ifTrue: [
+		| aSetOfMeasures |
+		aSetOfMeasures := Set new.
+		measures do: [:each |  aSetOfMeasures add: (each*aMultiplier ) ].
+		^Compuesta initializeWith: aSetOfMeasures andUnit: self unit
+	].
+	^Compuesta initializeWith: self andMultiply: aMultiplier.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -480,14 +482,12 @@ Medida subclass: #Compuesta2
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Compuesta2 methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:57:36'!
-+ aMeasure
+!Compuesta2 methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:39:43'!
+base
 
+	! !
 
-self unit = aMeasure unit ifTrue:[^ self class initializeWithAmount: self numberOfUnitsInBase + aMeasure numberOfUnitsInBase withUnit: self unit ].
-^Compuesta initializeWith: self andSum: aMeasure! !
-
-!Compuesta2 methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 20:35:44'!
+!Compuesta2 methodsFor: 'accessing' stamp: 'pR 6/6/2017 20:35:44'!
 numberOfUnitsInBase
 
 	^numberOfUnits! !
@@ -512,15 +512,10 @@ initializeWithMeters: aSmallInteger
 	^self initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
 
 
-!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 20:16:33'!
-amount
-	
-	^numberOfUnits! !
-
-!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:49:30'!
+!Distancia methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:43:22'!
 asMeters
 	
-	^numberOfUnits * unit factorToBase! !
+	^self asBaseUnits! !
 
 !Distancia methodsFor: 'accessing' stamp: 'pR 6/3/2017 14:08:14'!
 base
@@ -536,18 +531,6 @@ meters
 numberOfUnitsInBase
 	
 	^self asBaseUnits! !
-
-!Distancia methodsFor: 'accessing' stamp: 'pR 6/1/2017 20:17:02'!
-unit
-	
-	^unit! !
-
-
-!Distancia methodsFor: 'printing' stamp: 'pR 6/1/2017 20:15:56'!
-printString
-	
-	numberOfUnits = 1 ifTrue: [ ^numberOfUnits asString, ' ', unit printString ].
-	^numberOfUnits asString, ' ', unit printString, 's'! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -584,10 +567,10 @@ Medida subclass: #Peso
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Peso methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:11'!
+!Peso methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:04:11'!
 base! !
 
-!Peso methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:40:15'!
+!Peso methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:40:15'!
 numberOfUnitsInBase
 
 	^numberOfUnits! !
@@ -600,7 +583,7 @@ Medida subclass: #Temperatura
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 19:30:10'!
+!Temperatura methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 19:30:10'!
 + aTemperature
 
 	self class = aTemperature class ifFalse: [^super + aTemperature].
@@ -617,20 +600,26 @@ Medida subclass: #Temperatura
 	(unit = fahrenheit and: aTemperature unit = celsius) ifTrue: [^self class withKelvin: (self asKelvin + aTemperature asKelvin)].
 	(unit = fahrenheit and: aTemperature unit = fahrenheit) ifTrue: [^self class withKelvin: (self asFahrenheit + aTemperature asFahrenheit)].! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:54:18'!
+!Temperatura methodsFor: 'arithmetic' stamp: 'pR 6/7/2017 23:03:42'!
+- aTemperature
+
+	^-1 * (self + aTemperature)! !
+
+
+!Temperatura methodsFor: 'accessing' stamp: 'df 6/4/2017 17:54:18'!
 asCelsius
 self unit = kelvin ifTrue:[^ (self amount - 273)].
 self unit = fahrenheit ifTrue:[^(self amount -32)*5/9].
 ^self amount.! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:54:38'!
+!Temperatura methodsFor: 'accessing' stamp: 'df 6/4/2017 17:54:38'!
 asFahrenheit
 
 self unit = kelvin ifTrue:[^(self amount *9/5)-459.67].
 self unit = celsius ifTrue:[^(self amount*9/5)+32].
 ^self amount.! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 17:48:09'!
+!Temperatura methodsFor: 'accessing' stamp: 'pR 6/6/2017 17:48:09'!
 asKelvin
 
 	self unit = celsius ifTrue:[^ self amount + 273].
@@ -638,12 +627,18 @@ asKelvin
 	
 	^ self amount! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 22:47:39'!
+!Temperatura methodsFor: 'accessing' stamp: 'pR 6/4/2017 22:47:39'!
 base
 
 	^kelvin! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 16:12:47'!
+!Temperatura methodsFor: 'accessing' stamp: 'pR 6/6/2017 17:43:31'!
+numberOfUnitsInBase
+
+	^ self convertToKelvin asKelvin! !
+
+
+!Temperatura methodsFor: 'converting' stamp: 'df 6/4/2017 16:12:47'!
 convertTo: aUnit
 
 	self checkCanConvertFrom: self unit to: aUnit.
@@ -652,27 +647,22 @@ convertTo: aUnit
 	aUnit = celsius ifTrue:[^self convertToCelsius].
 	aUnit = fahrenheit ifTrue:[^self convertToFahrenheit].! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:52:23'!
+!Temperatura methodsFor: 'converting' stamp: 'df 6/4/2017 17:52:23'!
 convertToCelsius
 
 ^Temperatura withCelsius: self asCelsius.
 ! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:52:48'!
+!Temperatura methodsFor: 'converting' stamp: 'df 6/4/2017 17:52:48'!
 convertToFahrenheit
 
 	^Temperatura withFahrenheit: self asFahrenheit
 ! !
 
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'df 6/4/2017 17:52:34'!
+!Temperatura methodsFor: 'converting' stamp: 'df 6/4/2017 17:52:34'!
 convertToKelvin
 
 	^ Temperatura withKelvin: self asKelvin! !
-
-!Temperatura methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 17:43:31'!
-numberOfUnitsInBase
-
-	^ self convertToKelvin asKelvin! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -705,12 +695,12 @@ Medida subclass: #Tiempo
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Tiempo methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:19'!
+!Tiempo methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:04:19'!
 base
 	
 	^second! !
 
-!Tiempo methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 19:02:30'!
+!Tiempo methodsFor: 'accessing' stamp: 'df 6/7/2017 19:02:30'!
 numberOfUnitsInBase
 
 	^numberOfUnits/ unit ! !
@@ -734,20 +724,15 @@ Medida subclass: #Volumen
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:21:57'!
-asLiters
-
-	^numberOfUnits * unit factorToBase! !
-
-!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:04:27'!
+!Volumen methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:04:27'!
 base
 
 	^liter! !
 
-!Volumen methodsFor: 'as yet unclassified' stamp: 'pR 6/3/2017 13:21:16'!
+!Volumen methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:33:23'!
 numberOfUnitsInBase
 
-	^self asLiters! !
+	^numberOfUnits * unit factorToBase! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1077,30 +1062,33 @@ test22InicializacionDeMedidasConDivision
 	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) unit = ((oneMeter * oneMeter) / (oneSecond * oneSecond)) unit.
 	self assert: ((oneMeter / oneSecond) / (oneSecond / oneMeter)) = ((oneMeter * oneMeter) / (oneSecond * oneSecond)).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 19:11:55'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/7/2017 22:17:31'!
 test23InicializacionDeMedidasMultiplicandoODividiendoNumerosPorUnidades
 
-| dosMetros unSegundo velocidad cincoMetrosPorSegundo |
+| dosMetros unSegundo dosMetrosPorSegundo cincoMetrosPorSegundo |
 
 dosMetros := 2* meter.
 unSegundo := 1*second.
-velocidad := 2*meter/unSegundo.
+dosMetrosPorSegundo := 2*meter/unSegundo.
 cincoMetrosPorSegundo := (10*meter)/(2*second).
 
-self assert: (dosMetros/unSegundo) unit = velocidad unit.
-self assert: dosMetros/unSegundo  = velocidad.
-self assert: cincoMetrosPorSegundo unit = velocidad unit.
-self assert: cincoMetrosPorSegundo  = (velocidad *2.5).
-self assert: (meter/second) = (velocidad unit)! !
+self assert: (dosMetros/unSegundo) unit = dosMetrosPorSegundo unit.
+self assert: dosMetros/unSegundo  = dosMetrosPorSegundo.
+self assert: cincoMetrosPorSegundo unit = dosMetrosPorSegundo unit.
+self assert: cincoMetrosPorSegundo  = (dosMetrosPorSegundo *2.5).
+self assert: (meter/second) = (dosMetrosPorSegundo unit).! !
 
-!MedidaTest methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:58:21'!
+!MedidaTest methodsFor: 'as yet unclassified' stamp: 'pR 6/7/2017 23:15:24'!
 test24sumaYProductosDeUnidadesYNumeros
 
-| |
-
-self assert: (10*meter/second) + ((50*meter/(second*second))*(10*second)) = (10 * meter/second) + (500 * meter/second).
-
-! !
+self assert: (1 * meter / (1 * second)) * ((1 * second) / (1 * meter)) = 1.
+self assert: (1 * meter / (1 * second)) * (1 * second) = (1 * meter).
+self assert: (2 * meter / (3 * second * liter)) * (1 * second) = (2 * meter / (3 * liter)).
+self assert: ((2 * meter) / (3 * second)) + ((1 * meter) / (3 * second)) = (1 * meter / second).
+self assert: ((50*meter/(second*second))*(10*second)) = (500 * meter/second).
+self assert: (10 * meter / second) + ((50*meter/(second*second))*(10*second)) = ((500 * meter/second) + (10 * meter / second)).
+self assert: ((10 * meter / second) * (1 * second)) + ((50*meter/(second*second))*(10*second)*(1*second)) = (510 * meter).
+self assert: ((10 * meter / second) + ((50*meter/(second*second))*(10*second)) = (510 * meter / second)).! !
 
 
 !classDefinition: #CompoundUnit category: #'Measures-Solution'!
@@ -1110,7 +1098,7 @@ Object subclass: #CompoundUnit
 	poolDictionaries: ''
 	category: 'Measures-Solution'!
 
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:20:47'!
+!CompoundUnit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 18:20:47'!
 * aUnit
 
 
@@ -1130,7 +1118,7 @@ Object subclass: #CompoundUnit
 		^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
 		]! !
 
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 18:22:22'!
+!CompoundUnit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 18:22:22'!
 / aNumber
 
 	| unitsDem unitsNum |
@@ -1151,34 +1139,37 @@ Object subclass: #CompoundUnit
 		^CompoundUnit withNumerator: unitsNum withDenominator: unitsDem
 		! !
 
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:21:15'!
+!CompoundUnit methodsFor: 'arithmetic' stamp: 'df 6/7/2017 15:35:16'!
+adaptToNumber: rcvr andSend: selector
+
+	selector = #* ifTrue: [^Compuesta2 initializeWithAmount: rcvr withUnit: self]! !
+
+
+!CompoundUnit methodsFor: 'comparing' stamp: 'df 6/7/2017 17:21:15'!
 = aCompoundUnit
 	aCompoundUnit class = Unit ifTrue:[^(self unitsNumerator size = 1) and:[self unitsNumerator asArray at:1 = aCompoundUnit] ].
 	self class = aCompoundUnit class ifFalse: [^false].
 	
 	^unitsNumerator = aCompoundUnit unitsNumerator and: unitsDenominator = aCompoundUnit unitsDenominator! !
 
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 15:35:16'!
-adaptToNumber: rcvr andSend: selector
 
-	selector = #* ifTrue: [^Compuesta2 initializeWithAmount: rcvr withUnit: self]! !
-
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:56:08'!
-unitsDenominator
-
-	^unitsDenominator! !
-
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'pR 6/6/2017 18:55:56'!
-unitsNumerator
-
-	^unitsNumerator! !
-
-!CompoundUnit methodsFor: 'as yet unclassified' stamp: 'df 6/7/2017 17:18:41'!
+!CompoundUnit methodsFor: 'initializing' stamp: 'df 6/7/2017 17:18:41'!
 withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
 
 (aCompoundUnit class = Bag)not ifTrue:[unitsNumerator := Bag new. unitsNumerator add: aCompoundUnit.] ifFalse:[unitsNumerator :=  aCompoundUnit.].
 (anotherCompoundUnit class = Bag)not ifTrue:[unitsDenominator := Bag new. unitsDenominator add: anotherCompoundUnit .] ifFalse:[unitsDenominator :=  anotherCompoundUnit .].
 	! !
+
+
+!CompoundUnit methodsFor: 'accessing' stamp: 'pR 6/6/2017 18:56:08'!
+unitsDenominator
+
+	^unitsDenominator! !
+
+!CompoundUnit methodsFor: 'accessing' stamp: 'pR 6/6/2017 18:55:56'!
+unitsNumerator
+
+	^unitsNumerator! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1254,6 +1245,10 @@ printString
 	^name! !
 
 
+!Unit methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:25:09'!
+amount
+	^1! !
+
 !Unit methodsFor: 'accessing' stamp: 'pR 6/1/2017 19:45:26'!
 factorToBase
 
@@ -1263,6 +1258,10 @@ factorToBase
 measurableClass
 	
 	^measurableClass! !
+
+!Unit methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:24:42'!
+unit
+	^self! !
 
 
 !Unit methodsFor: 'initialization' stamp: 'pR 6/4/2017 22:49:26'!
