@@ -1,9 +1,9 @@
-!classDefinition: #Medida category: #'Measures-Solution'!
+!classDefinition: #Medida category: #'Measure-Solution'!
 Magnitude subclass: #Medida
 	instanceVariableNames: 'numberOfUnits unit'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Medida methodsFor: 'accessing' stamp: 'pR 6/7/2017 22:40:06'!
 amount
@@ -200,7 +200,7 @@ to: aMeasure by: aStep
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Medida class' category: #'Measures-Solution'!
+!classDefinition: 'Medida class' category: #'Measure-Solution'!
 Medida class
 	instanceVariableNames: ''!
 
@@ -224,12 +224,12 @@ initializeWithAmount: anAmount withUnit: aUnit
 	^self new initializeWithAmount: anAmount withUnit: aUnit! !
 
 
-!classDefinition: #Compuesta category: #'Measures-Solution'!
+!classDefinition: #Compuesta category: #'Measure-Solution'!
 Medida subclass: #Compuesta
 	instanceVariableNames: 'measures'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Compuesta methodsFor: 'initializing' stamp: 'pR 6/8/2017 13:24:18'!
 initializeWith: aMeasure andDivide: anotherMeasure
@@ -445,7 +445,7 @@ numberOfUnitsInBase
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Compuesta class' category: #'Measures-Solution'!
+!classDefinition: 'Compuesta class' category: #'Measure-Solution'!
 Compuesta class
 	instanceVariableNames: ''!
 
@@ -477,12 +477,12 @@ initializeWith: aMeasure andUnit: aUnit
 	^self new initializeWith: aMeasure andUnit: aUnit! !
 
 
-!classDefinition: #CompuestaProdYDiv category: #'Measures-Solution'!
+!classDefinition: #CompuestaProdYDiv category: #'Measure-Solution'!
 Medida subclass: #CompuestaProdYDiv
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !CompuestaProdYDiv methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 13:24:54'!
 base
@@ -494,12 +494,12 @@ numberOfUnitsInBase
 	^numberOfUnits! !
 
 
-!classDefinition: #Distancia category: #'Measures-Solution'!
+!classDefinition: #Distancia category: #'Measure-Solution'!
 Medida subclass: #Distancia
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Distancia methodsFor: 'initialization' stamp: 'pR 6/1/2017 19:59:13'!
 initializeScaleLike: aUnit withNumberOfUnits: aNumberOfUnits
@@ -535,7 +535,7 @@ numberOfUnitsInBase
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Distancia class' category: #'Measures-Solution'!
+!classDefinition: 'Distancia class' category: #'Measure-Solution'!
 Distancia class
 	instanceVariableNames: ''!
 
@@ -561,12 +561,12 @@ initializeWithMeters: aSmallInteger
 	^self new initializeScaleLike: meter withNumberOfUnits: aSmallInteger! !
 
 
-!classDefinition: #Peso category: #'Measures-Solution'!
+!classDefinition: #Peso category: #'Measure-Solution'!
 Medida subclass: #Peso
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Peso methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:04:11'!
 base! !
@@ -577,12 +577,12 @@ numberOfUnitsInBase
 	^numberOfUnits! !
 
 
-!classDefinition: #Temperatura category: #'Measures-Solution'!
+!classDefinition: #Temperatura category: #'Measure-Solution'!
 Medida subclass: #Temperatura
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Temperatura methodsFor: 'arithmetic' stamp: 'pR 6/6/2017 19:30:10'!
 + aTemperature
@@ -667,7 +667,7 @@ convertToKelvin
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Temperatura class' category: #'Measures-Solution'!
+!classDefinition: 'Temperatura class' category: #'Measure-Solution'!
 Temperatura class
 	instanceVariableNames: ''!
 
@@ -689,12 +689,12 @@ withKelvin: aTemperature
 	^Temperatura new initializeWithAmount: aTemperature withUnit: kelvin! !
 
 
-!classDefinition: #Tiempo category: #'Measures-Solution'!
+!classDefinition: #Tiempo category: #'Measure-Solution'!
 Medida subclass: #Tiempo
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Tiempo methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:04:19'!
 base
@@ -708,9 +708,24 @@ numberOfUnitsInBase
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Tiempo class' category: #'Measures-Solution'!
+!classDefinition: 'Tiempo class' category: #'Measure-Solution'!
 Tiempo class
 	instanceVariableNames: ''!
+
+!Tiempo class methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 14:58:32'!
+initializeWithDays: aNumberOfDays
+
+	^self new initializeWithAmount: aNumberOfDays withUnit: day! !
+
+!Tiempo class methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 14:59:01'!
+initializeWithHours: aNumberOfHours
+
+	^self new initializeWithAmount: aNumberOfHours withUnit: hour! !
+
+!Tiempo class methodsFor: 'as yet unclassified' stamp: 'pR 6/8/2017 14:59:05'!
+initializeWithMinutes: aNumberOfMinutes
+
+	^self new initializeWithAmount: aNumberOfMinutes withUnit: minute! !
 
 !Tiempo class methodsFor: 'as yet unclassified' stamp: 'pR 6/4/2017 23:40:55'!
 initializeWithSeconds: aNumberOfSeconds
@@ -718,12 +733,12 @@ initializeWithSeconds: aNumberOfSeconds
 	^self new initializeWithAmount: aNumberOfSeconds withUnit: second! !
 
 
-!classDefinition: #Volumen category: #'Measures-Solution'!
+!classDefinition: #Volumen category: #'Measure-Solution'!
 Medida subclass: #Volumen
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Volumen methodsFor: 'accessing' stamp: 'pR 6/4/2017 23:04:27'!
 base
@@ -737,7 +752,7 @@ numberOfUnitsInBase
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Volumen class' category: #'Measures-Solution'!
+!classDefinition: 'Volumen class' category: #'Measure-Solution'!
 Volumen class
 	instanceVariableNames: ''!
 
@@ -747,12 +762,12 @@ initializeWithLiters: aVolume
 	^self new initializeWithAmount: aVolume withUnit: liter! !
 
 
-!classDefinition: #MedidaInterval category: #'Measures-Solution'!
+!classDefinition: #MedidaInterval category: #'Measure-Solution'!
 Interval subclass: #MedidaInterval
 	instanceVariableNames: 'myInterval step startingMeasure endingMeasure'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !MedidaInterval methodsFor: 'accessing' stamp: 'pR 6/1/2017 21:06:50'!
 by
@@ -809,12 +824,12 @@ from: aStartingMeasure to: anEndingMeasure by: aStepMeasure
 	step := aStepMeasure .! !
 
 
-!classDefinition: #MedidaTest category: #'Measures-Solution'!
+!classDefinition: #MedidaTest category: #'Measure-Solution'!
 TestCase subclass: #MedidaTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !MedidaTest methodsFor: 'tests aritmetica mismo tipo' stamp: 'pR 6/3/2017 13:23:30'!
 test02puedoSumarMedidasDelMismoTipo
@@ -1110,12 +1125,12 @@ test25lasUnidadesDeSumaDeDistintasUnidadesSonDistintas
 	self assert: ((oneMeter + oneSecond) / oneSecond) = ((oneSecond + oneMeter) / oneSecond).! !
 
 
-!classDefinition: #CompoundUnit category: #'Measures-Solution'!
+!classDefinition: #CompoundUnit category: #'Measure-Solution'!
 Object subclass: #CompoundUnit
 	instanceVariableNames: 'unitsNumerator unitsDenominator'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !CompoundUnit methodsFor: 'arithmetic' stamp: 'pR 6/8/2017 13:36:57'!
 * aUnit
@@ -1207,7 +1222,7 @@ unitsNumerator
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'CompoundUnit class' category: #'Measures-Solution'!
+!classDefinition: 'CompoundUnit class' category: #'Measure-Solution'!
 CompoundUnit class
 	instanceVariableNames: ''!
 
@@ -1223,12 +1238,12 @@ withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit
 	^self new withNumerator: aCompoundUnit withDenominator: anotherCompoundUnit! !
 
 
-!classDefinition: #CompoundUnitSumSubtract category: #'Measures-Solution'!
+!classDefinition: #CompoundUnitSumSubtract category: #'Measure-Solution'!
 Object subclass: #CompoundUnitSumSubtract
 	instanceVariableNames: 'unitsSum unitsSubtract'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !CompoundUnitSumSubtract methodsFor: 'comparing' stamp: 'pR 6/8/2017 14:14:11'!
 = aCompoundUnit
@@ -1265,7 +1280,7 @@ withSum: aSetOfUnits withSubtract: anotherSetOfUnits
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'CompoundUnitSumSubtract class' category: #'Measures-Solution'!
+!classDefinition: 'CompoundUnitSumSubtract class' category: #'Measure-Solution'!
 CompoundUnitSumSubtract class
 	instanceVariableNames: ''!
 
@@ -1275,55 +1290,301 @@ withSum: aSetOfUnits withSubtract: anotherSetOfUnits
 	^self new withSum: aSetOfUnits withSubtract: anotherSetOfUnits! !
 
 
-!classDefinition: #DistanceFactory category: #'Measures-Solution'!
-Object subclass: #DistanceFactory
+!classDefinition: #MeasureFactory category: #'Measure-Solution'!
+Object subclass: #MeasureFactory
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:35'!
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:46:40'!
 minusOneMeter
-	
+
 	^Distancia initializeWithMeters: -1! !
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:29'!
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:46:57'!
 oneCentimeter
-	
+
 	^Distancia initializeWithCentimeters: 1! !
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:24'!
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:47:09'!
 oneHundredCentimeters
-	
+
 	^Distancia initializeWithCentimeters: 100! !
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:18'!
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:47:39'!
 oneMeter
-	
-	^Distancia initializeWithMeters: 1! !
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:02:56'!
+	^Distancia initializeWithMeters: 1.! !
+
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:47:27'!
 twoHundredCentimeters
-	
+
 	^Distancia initializeWithCentimeters: 200! !
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:03:15'!
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:47:49'!
 twoMeters
-	
-	^Distancia initializeWithMeters: 2! !
 
-!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'pR 5/26/2017 21:03:26'!
+	^Distancia initializeWithMeters: 2.! !
+
+!MeasureFactory methodsFor: 'Distance measures' stamp: 'pR 6/8/2017 14:48:02'!
 zeroMeters
-	
+
 	^Distancia initializeWithMeters: 0! !
 
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:42:56'!
+centimeter
+	
+	^Unit withName:'centimeter' withConversionFactorToBase: 1 / 100 withMeasurableClass: Distancia. 	! !
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:43:19'!
+decameter
+	
+	^Unit withName:'decameter' withConversionFactorToBase: 10 withMeasurableClass: Distancia.! !
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:43:39'!
+decimeter
+	
+	^Unit withName:'decimeter'  withConversionFactorToBase: 1 / 10 withMeasurableClass: Distancia.! !
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:44:06'!
+hectometer
+
+	^Unit withName:'hectometer'  withConversionFactorToBase: 100 withMeasurableClass: Distancia.! !
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:44:24'!
+kilometer
+
+	^Unit withName:'kilometer'  withConversionFactorToBase: 1000 withMeasurableClass: Distancia.! !
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:44:39'!
+meter
+
+	^Unit withName:'meter'  withConversionFactorToBase: 1 withMeasurableClass: Distancia.! !
+
+!MeasureFactory methodsFor: 'Distance units' stamp: 'pR 6/8/2017 14:44:47'!
+millimeter
+
+	^Unit withName:'milimeter'  withConversionFactorToBase: 1 / 1000 withMeasurableClass: Distancia.! !
+
+
+!MeasureFactory methodsFor: 'Temperature units' stamp: 'pR 6/8/2017 14:50:24'!
+celsius
+
+	^Unit withName:'celsius'  withConversionFactorToBase: 1 withMeasurableClass: Temperatura.! !
+
+!MeasureFactory methodsFor: 'Temperature units' stamp: 'pR 6/8/2017 14:51:26'!
+fahrenheit
+
+	^Unit withName:'fahrenheit'  withConversionFactorToBase: 1 withMeasurableClass: Temperatura! !
+
+!MeasureFactory methodsFor: 'Temperature units' stamp: 'pR 6/8/2017 14:49:32'!
+kelvin! !
+
+
+!MeasureFactory methodsFor: 'Temperature measures' stamp: 'pR 6/8/2017 14:51:54'!
+oneCelsius
+	
+	Temperatura withCelsius: 1! !
+
+!MeasureFactory methodsFor: 'Temperature measures' stamp: 'pR 6/8/2017 14:52:21'!
+thirtyTwoFahrenheits
+	
+	^Temperatura withFahrenheit: 32.! !
+
+!MeasureFactory methodsFor: 'Temperature measures' stamp: 'pR 6/8/2017 14:52:33'!
+twoCelsius
+
+	^Temperatura withCelsius: 2! !
+
+!MeasureFactory methodsFor: 'Temperature measures' stamp: 'pR 6/8/2017 14:52:45'!
+zeroCelsius
+
+	^Temperatura withCelsius: 0! !
+
+!MeasureFactory methodsFor: 'Temperature measures' stamp: 'pR 6/8/2017 14:52:54'!
+zeroKelvin
+
+	^Temperatura withKelvin: 0! !
+
+
+!MeasureFactory methodsFor: 'Time units' stamp: 'pR 6/8/2017 14:56:52'!
+day
+
+	^Unit withName:'day'  withConversionFactorToBase: 60*60*24 withMeasurableClass: Tiempo.! !
+
+!MeasureFactory methodsFor: 'Time units' stamp: 'pR 6/8/2017 14:56:43'!
+hour
+
+	^Unit withName:'hour'  withConversionFactorToBase: 60*60 withMeasurableClass: Tiempo.! !
+
+!MeasureFactory methodsFor: 'Time units' stamp: 'pR 6/8/2017 14:56:29'!
+minute
+
+	^Unit withName:'minute'  withConversionFactorToBase: 60 withMeasurableClass: Tiempo.! !
+
+!MeasureFactory methodsFor: 'Time units' stamp: 'pR 6/8/2017 14:56:09'!
+second
+
+	^Unit withName:'second'  withConversionFactorToBase: 1 withMeasurableClass: Tiempo.! !
+
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 14:59:31'!
+oneDay
+	
+	^Tiempo initializeWithDays: 1! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 14:59:42'!
+oneHour
+	
+	^Tiempo initializeWithHours: 1! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 14:59:52'!
+oneMinute
+	
+	^Tiempo initializeWithMinutes: 1! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:00:10'!
+oneSecond
+	
+	^Tiempo initializeWithSeconds: 1! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:00:22'!
+sixtyMinutes
+	
+	^Tiempo initializeWithMinutes: 60! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:00:43'!
+sixtyOneSeconds
+	
+	^Tiempo initializeWithSeconds: 61! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:00:48'!
+sixtySeconds
+	
+	^Tiempo initializeWithSeconds: 60! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:00:59'!
+twentyFourHours
+	
+	^Tiempo initializeWithHours: 24! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:01:07'!
+twoSeconds
+	
+	^Tiempo initializeWithSeconds: 2! !
+
+!MeasureFactory methodsFor: 'Time measures' stamp: 'pR 6/8/2017 15:01:18'!
+zeroSeconds
+	
+	^Tiempo initializeWithSeconds: 0! !
+
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:14:36'!
+eightCubicMeters
+	|unitMeter|
+	
+	unitMeter := Unit withName:'meter'  withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	
+	^8 * (1 * unitMeter * unitMeter * unitMeter).! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:14:18'!
+fourSquaredMeters
+	|unitMeter|
+	
+	unitMeter := Unit withName:'meter'  withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	
+	^4 * (1 * unitMeter * unitMeter)! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:17:21'!
+oneHundredTwentyOneMetersPerSecond
+	|unitMeter unitSecond|
+	
+	unitMeter := Unit withName: 'meter' withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	unitSecond := Unit withName: 'second' withConversionFactorToBase: 1 withMeasurableClass: Tiempo.
+	
+	^121 * (1 * unitMeter / unitSecond).
+	
+	! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:18:01'!
+oneMeterPerSecond
+	|unitMeter unitSecond|
+	
+	unitMeter := Unit withName: 'meter' withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	unitSecond := Unit withName: 'second' withConversionFactorToBase: 1 withMeasurableClass: Tiempo.
+	
+	^1 * unitMeter / unitSecond
+	
+	! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:18:29'!
+oneSquaredMeter
+	|unitMeter |
+	
+	unitMeter := Unit withName: 'meter' withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	
+	^1 * unitMeter * unitMeter
+	
+	! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:19:01'!
+oneSquaredSecond
+	|unitSecond |
+	
+	unitSecond := Unit withName: 'second' withConversionFactorToBase: 1 withMeasurableClass: Tiempo.
+	
+	^1 * unitSecond * unitSecond
+	
+	! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:20:27'!
+twoMetersBySecond
+	|unitSecond unitMeter |
+	
+	unitMeter := Unit withName: 'meter' withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	unitSecond := Unit withName: 'second' withConversionFactorToBase: 1 withMeasurableClass: Tiempo.
+	
+	^2* (1 * unitMeter / unitSecond)
+	
+	! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:20:57'!
+twoMetersPerSquaredSecond
+	|unitSecond unitMeter |
+	
+	unitMeter := Unit withName: 'meter' withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	unitSecond := Unit withName: 'second' withConversionFactorToBase: 1 withMeasurableClass: Tiempo.
+	
+	^2* (1 * unitMeter / (1 * unitSecond * unitSecond) )
+	
+	! !
+
+!MeasureFactory methodsFor: 'Compound measures' stamp: 'pR 6/8/2017 15:21:20'!
+twoMetersTimesSecond
+	|unitSecond unitMeter |
+	
+	unitMeter := Unit withName: 'meter' withConversionFactorToBase: 1 withMeasurableClass: Distancia.
+	unitSecond := Unit withName: 'second' withConversionFactorToBase: 1 withMeasurableClass: Tiempo.
+	
+	^2* (1 * unitMeter / (1 * unitSecond) )
+	
+	! !
+
+
+!MeasureFactory methodsFor: 'adicionales' stamp: 'pR 6/8/2017 15:10:08'!
+finalSpeedStartingAt: vi accelerating: a during: t
+	
+	^vi + (a * t)! !
+
 
-!classDefinition: #Unit category: #'Measures-Solution'!
+!classDefinition: #Unit category: #'Measure-Solution'!
 Object subclass: #Unit
 	instanceVariableNames: 'factorToBase name measurableClass'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Measures-Solution'!
+	category: 'Measure-Solution'!
 
 !Unit methodsFor: 'printing' stamp: 'pR 6/1/2017 19:43:06'!
 printString
@@ -1387,7 +1648,7 @@ adaptToNumber: rcvr andSend: selector
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Unit class' category: #'Measures-Solution'!
+!classDefinition: 'Unit class' category: #'Measure-Solution'!
 Unit class
 	instanceVariableNames: ''!
 
