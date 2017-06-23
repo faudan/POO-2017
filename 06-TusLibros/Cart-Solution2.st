@@ -363,3 +363,74 @@ Cart class
 withCatalog: aCatalog
 
 ^self new withCatalog: aCatalog .! !
+
+
+!classDefinition: #InterfazMP category: #'Cart-Solution'!
+Object subclass: #InterfazMP
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 19:52:01'!
+addCard: aCredCard withAmount: anAmount! !
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 19:51:36'!
+debit: anAmount from: aCreditCard! !
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 20:01:38'!
+errorMPUnavailable
+ ^'mp is unavailable'! !
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 20:01:14'!
+errorStolenCard
+ ^'card is stolen'! !
+
+
+!classDefinition: #MPSimulator category: #'Cart-Solution'!
+InterfazMP subclass: #MPSimulator
+	instanceVariableNames: 'closure'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 20:00:09'!
+debit: anAmount from: aCard
+
+closure value.! !
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 20:00:21'!
+with: aClosure
+
+closure := aClosure! !
+
+
+!classDefinition: #MerchProcessor category: #'Cart-Solution'!
+InterfazMP subclass: #MerchProcessor
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+
+!classDefinition: #InterfazREST category: #'Cart-Solution'!
+Object subclass: #InterfazREST
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 21:04:02'!
+addToCart: anItem! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 21:04:06'!
+checkOut! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 21:03:52'!
+createCartfor:anID autenticatedWith: aPassword! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 21:04:50'!
+listCart! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 21:04:42'!
+listPurchases! !
