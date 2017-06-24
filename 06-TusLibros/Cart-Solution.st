@@ -1,349 +1,108 @@
-!classDefinition: #CartCatalog category: #'Cart-Solution'!
-Set subclass: #CartCatalog
-	instanceVariableNames: ''
+!classDefinition: #Cashier category: #'Cart-Solution'!
+Dictionary subclass: #Cashier
+	instanceVariableNames: 'cart creditCard date libroDeVentas merchantProcessor'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Cart-Solution'!
 
-!CartCatalog methodsFor: 'checking' stamp: 'df 6/15/2017 20:02:27'!
-checkContains: aBook
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:29:05'!
+checkOut
 
-	(self includes: aBook) 
-		ifFalse: [^self error: 'cant add book thats not in the catalog'].! !
-
-!CartCatalog methodsFor: 'checking' stamp: 'pR 6/14/2017 14:34:36'!
-checkFormat: aBook
-
-	(aBook includesSubString: 'publisher')
-		ifFalse: [^self error: 'invalid format of book'].! !
-
-!CartCatalog methodsFor: 'checking' stamp: 'pR 6/14/2017 14:40:29'!
-checkPublisher: aBook
-
-	(aBook includesSubString: 'Salamanca')
-		ifFalse: [^self error: 'not from publisher'].! !
-
-
-!classDefinition: #TestsCart category: #'Cart-Solution'!
-TestCase subclass: #TestsCart
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 14:23:04'!
-test01CanNotAddBookNotFromAllowedPublisher
-
-	| cart book |
-	
-	cart := Cart new.
-	book := 'invalid format'.
-	
-	self
-		should: [cart add: book]
-		raise: Error
-		withExceptionDo: [:anError | 
-			self assert: [anError messageText = 'invalid format of book'].
-			self assert: cart isEmpty.	
-		]! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:08:21'!
-test02CanAddBookFromAllowedPublisher
-
-	| cart book catalog |
-	book := 'publisher: Salamanca'.
-	catalog := CartCatalog new.
-	catalog add: book.
-	cart := Cart withCatalog: catalog.
-
-	
-	cart add: book.
-	self deny: cart isEmpty! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:19:18'!
-test03BooksFromPublisherAreInSpecificFormat
-
-	| cart book1 book2 catalog |
-	
-
-	book1 := 'publisher: Salamanca'.
-	book2 := 'publisher: otro'.
-	catalog := CartCatalog new.
-	catalog add: book1.
-
-	cart := Cart withCatalog: catalog.
-	
-	
-	cart add: book1.
-	self
-		should: [cart add: book2]
-		raise: Error
-		withExceptionDo: [:anError | 
-			self assert: [anError messageText = 'not from publisher'].
-		]! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:13:41'!
-test04CanAddTheSameBookTwice
-
-	| cart book1 book2 catalog |
-	
-	"cart := Cart new."
-	book1 := 'publisher: Salamanca title: chess'.
-	book2 := 'publisher: Salamanca title: tennis'.
-	catalog := CartCatalog new.
-	catalog add: book1.
-	catalog add: book2.
-	cart := Cart withCatalog: catalog.
-	cart add: book1.
-	cart add: book1.
-	cart add: book2 amount: 5.
-	
-	self assert: (cart contents occurrencesOf: book1) = 2.
-	self assert: (cart differentContents size = 2).
-	self assert: (cart contents occurrencesOf: book2) = 5.! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:15:23'!
-test05CannotModifyConentsFromOutside
-
-	| cart book1  catalog |
-	
-
-	book1 := 'publisher: Salamanca title: chess'.
-	catalog := CartCatalog new.
-	catalog add: book1.
-
-	cart := Cart withCatalog: catalog.
-	cart add: book1.
-	cart contents remove: book1 ifAbsent: [].
-	
-	self deny: cart isEmpty! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:16:05'!
-test06CanRemoveElements
-
-	| cart book1  catalog |
-	
-
-	book1 := 'publisher: Salamanca title: chess'.
-	catalog := CartCatalog new.
-	catalog add: book1.
-
-	cart := Cart withCatalog: catalog.
-	cart add: book1.
-	cart remove: book1.
-	
-	self assert: cart isEmpty! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:16:43'!
-test07CanCheckoutWithNotEmptyCart
-
-	| cart book1 cashier aMasterCard catalog |
-	
-	
-	book1 := 'publisher: Salamanca title: chess'.
-	cashier := Cashier new.
-	aMasterCard := CreditCard newExpires: DateAndTime tomorrow.
-	
-	catalog := CartCatalog new.
-	catalog add: book1.
-
-	cart := Cart withCatalog: catalog.
-	
-	cart add: book1.
-	
-	cashier checkout: cart payingWith: aMasterCard.! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 15:16:51'!
-test08CanNotCheckoutWithEmptyCart
-
-	| cart cashier aMasterCard |
-	
-	cart := Cart new.
-	cashier := Cashier new.
-	aMasterCard := CreditCard new.
-	
-	self 
-		should: [cashier checkout: cart payingWith: aMasterCard]
-		raise: Error
-		withExceptionDo: [:anError | self assert: anError messageText = 'cant checkout empty cart'].! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:17:13'!
-test09CashierCanMakePaymentOfCartThroughCreditCard
-
-	| cart cashier aMasterCard book1 catalog |
-	
-
-	cashier := Cashier new.
-	aMasterCard := CreditCard newExpires: DateAndTime tomorrow.
-	book1 := 'publisher: Salamanca title: chess'.
-	catalog := CartCatalog new.
-	catalog add: book1.
-
-	cart := Cart withCatalog: catalog.
-	
-	cart add: book1.
-	
-	self assert: ((cashier checkout: cart payingWith: aMasterCard) = 0)! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:17:37'!
-test10CanNotDebitFromExpiredCreditCard
-
-	| cart cashier aMasterCard book1 catalog |
-	
-
-	cashier := Cashier new.
-	aMasterCard := CreditCard newExpires: DateAndTime yesterday.
-	book1 := 'publisher: Salamanca title: chess'.
-	catalog := CartCatalog new.
-	catalog add: book1.
-
-	cart := Cart withCatalog: catalog.
-	
-	cart add: book1.
-	
-	self 
-		should: [cashier checkout: cart payingWith: aMasterCard]
-		raise: Error
-		withExceptionDo: [:anError | self assert: anError messageText = 'credit card has expired'].! !
-
-!TestsCart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:21:17'!
-test11CanNotAddBookIfNotInCatalog
-
-	| cart book1 |
-	
-	
-	cart := Cart new.
-	book1 := 'publisher: Salamanca title: chess'.
-	
-	self 
-		should: [cart add: book1.]
-		raise: Error
-		withExceptionDo: [:anError | 
-			self assert: anError messageText = 'cant add book thats not in the catalog'.
-			self assert: cart isEmpty.
-			].! !
-
-
-!classDefinition: #Cart category: #'Cart-Solution'!
-Object subclass: #Cart
-	instanceVariableNames: 'content catalog'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-
-!Cart methodsFor: 'accessing' stamp: 'pR 6/14/2017 14:48:20'!
-contents
-	
-	^content copy! !
-
-!Cart methodsFor: 'accessing' stamp: 'pR 6/14/2017 14:43:51'!
-differentContents
-	
-	^self contents asSet! !
-
-!Cart methodsFor: 'accessing' stamp: 'pR 6/14/2017 13:52:29'!
-isEmpty
-	
-	^content isEmpty! !
+| saleAmount |
+saleAmount := cart totalPrice.
 
 
-!Cart methodsFor: 'initializing' stamp: 'pR 6/14/2017 14:34:04'!
-initialize
-
-	content := Bag new.
-	catalog := CartCatalog new.! !
+((merchantProcessor debit: saleAmount from: creditCard) isKindOf: ErrorMP) ifTrue:[ ^self tusLibros].
 
 
-!Cart methodsFor: 'adding' stamp: 'df 6/15/2017 20:01:07'!
-add: aBook
+ 
+self recordSaleInBook.
+! !
 
-	catalog checkFormat: aBook.
-	catalog checkPublisher: aBook.
-	catalog checkContains: aBook.
-	content add: aBook.! !
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:32:59'!
+recordSaleInBook
+
+cart content do:[:each | libroDeVentas add: {each. cart catalog priceOf: each}].
+
+! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:36:22'!
+saleBook
+^libroDeVentas copy! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:46:24'!
+tusLibros! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:38:40'!
+withCart: aCart CreditCard: aCreditCard Date: aDate
 
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 15:07:01'!
-add: aString amount: aSmallInteger 
-	
-	1 to: aSmallInteger do: [:each | content add: aString].! !
+cart:= aCart.
+creditCard:=aCreditCard.
+date:= aDate.
+libroDeVentas := Set new.! !
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 14:49:23'!
-remove: aString 
-	
-	content remove: aString ifAbsent: []! !
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:01:58'!
+withCart: aCart aCreditCard: aCreditCard aDate: aDate aMerchProcessor: anMP.
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:06:58'!
-withCatalog: aCatalog
 
-content := Bag new.
-catalog := aCatalog. ! !
+cart:= aCart.
+creditCard:=aCreditCard.
+date:= aDate.
+libroDeVentas := Set new.
+
+merchantProcessor := anMP.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Cart class' category: #'Cart-Solution'!
-Cart class
+!classDefinition: 'Cashier class' category: #'Cart-Solution'!
+Cashier class
 	instanceVariableNames: ''!
 
-!Cart class methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 20:06:16'!
-withCatalog: aCatalog
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:17:11'!
+checkCart: aCart
 
- ^self new withCatalog: aCatalog.! !
+aCart isEmpty ifTrue:[^self error:'cant have a cashier for an empty cart'].! !
 
-
-!classDefinition: #Cashier category: #'Cart-Solution'!
-Object subclass: #Cashier
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:18:18'!
+checkExpiration: aCreditCard for: aDate
+(aCreditCard isExpiredOn:aDate) ifTrue:[^self error: 'cant have a cashier if credit card is expired']! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 15:23:34'!
-calculateCartTotalPrice: aCart.
-	
-	^0! !
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:18:30'!
+withCart: aCart aCreditCard: aCreditCard aDate: aDate
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 15:37:26'!
-checkout: aCart payingWith: aCreditCard
-	| totalPrice |
-	
-	aCart isEmpty ifTrue: [^self error: 'cant checkout empty cart'].
-	totalPrice := self calculateCartTotalPrice: aCart.
-	self debit: totalPrice from: aCreditCard.
-	
-	^totalPrice! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'pR 6/14/2017 15:38:11'!
-debit: totalPrice from: aCreditCard.
+self checkCart: aCart.
+self checkExpiration: aCreditCard for: aDate.
+^self new withCart: aCart aCreditCard: aCreditCard aDate: aDate.! !
 
-	(aCreditCard hasExpired: DateAndTime today) 
-		ifTrue: [^self error: 'credit card has expired'].! !
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:28:53'!
+withCart: aCart aCreditCard: aCreditCard aDate: aDate aMerchProcessor: anMP
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/15/2017 21:30:41'!
-registrarComprasEnLibro
 
-"crear el cajero en base al carrito, la tarjeta, la fecha etc"
-"que el cajero en si sea el registro de todo el contexto de la venta"
-"simular la interfaz con el merchant processor para testear el cajero, que pasa si la tarjeta esta robada etc"! !
+self checkCart: aCart.
+self checkExpiration: aCreditCard for: aDate.
+^self new withCart: aCart aCreditCard: aCreditCard aDate: aDate aMerchProcessor: anMP.! !
 
 
 !classDefinition: #CreditCard category: #'Cart-Solution'!
-Object subclass: #CreditCard
-	instanceVariableNames: 'expirationDate'
+Dictionary subclass: #CreditCard
+	instanceVariableNames: 'number owner expiration'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Cart-Solution'!
 
-!CreditCard methodsFor: 'initializing' stamp: 'pR 6/14/2017 15:39:19'!
-expires: aDateAndTime
-	
-	expirationDate := aDateAndTime! !
+!CreditCard methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:36:49'!
+isExpiredOn: aDate.
 
+^expiration<aDate ! !
 
-!CreditCard methodsFor: 'accessing' stamp: 'pR 6/14/2017 15:35:56'!
-hasExpired: aTrue 
-	
-	^DateAndTime today > expirationDate! !
+!CreditCard methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:35:45'!
+withNumber: aNumber Owner:anOwner Expiration: anExpirationDate
+
+number:= aNumber.
+owner := anOwner.
+expiration := anExpirationDate .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -351,7 +110,577 @@ hasExpired: aTrue
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'class initialization' stamp: 'pR 6/14/2017 15:40:02'!
-newExpires: aDate
-	
-	^self new expires: aDate! !
+!CreditCard class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:07:12'!
+checkValidNumber:aNumber.
+(aNumber size = 16) ifFalse:[^ self error: 'invalid card number']! !
+
+!CreditCard class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:07:01'!
+checkValidOwner: anOwner.
+anOwner isEmpty ifTrue:[^self error: 'invalid owner name']
+! !
+
+!CreditCard class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:04:14'!
+withNumber: aNumber Owner:anOwner Expiration: anExpirationDate
+
+self checkValidNumber:aNumber.
+self checkValidOwner: anOwner.
+^self new withNumber: aNumber Owner:anOwner Expiration: anExpirationDate
+! !
+
+
+!classDefinition: #ShoppingCatalog category: #'Cart-Solution'!
+Dictionary subclass: #ShoppingCatalog
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!ShoppingCatalog methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:37:42'!
+checkIfExists: anItem
+
+(self includesKey: anItem) ifFalse:[^self itemNotInCatalog ].! !
+
+!ShoppingCatalog methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:19:02'!
+itemNotInCatalog
+^ self error:'the requested item is not in the catalog and cant be added'! !
+
+!ShoppingCatalog methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:31:02'!
+priceOf: anItem
+
+^self at:anItem! !
+
+
+!classDefinition: #ErrorMP category: #'Cart-Solution'!
+Exception subclass: #ErrorMP
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'ErrorMP class' category: #'Cart-Solution'!
+ErrorMP class
+	instanceVariableNames: ''!
+
+!ErrorMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:29:27'!
+caido
+^self new! !
+
+
+!classDefinition: #MarketTests category: #'Cart-Solution'!
+TestCase subclass: #MarketTests
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!MarketTests methodsFor: 'CartTesting' stamp: 'df 6/24/2017 16:19:20'!
+test01CanHaveAnEmptyCart
+
+
+| cart |
+
+cart := MarketFactory emptyCart.
+
+self assert: cart isEmpty! !
+
+!MarketTests methodsFor: 'CartTesting' stamp: 'df 6/24/2017 16:23:21'!
+test02AddingItemsNotInCatalogShouldNotBePossibleAndRaiseAnExceptionInstead
+
+
+| cart book catalog |
+catalog:= ShoppingCatalog new.
+
+
+cart := MarketFactory emptyCartWithCatalog: catalog.
+book := Object new.
+self should:[cart add: book] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'the requested item is not in the catalog and cant be added'.
+			self assert: cart isEmpty.
+			]! !
+
+!MarketTests methodsFor: 'CartTesting' stamp: 'df 6/24/2017 16:21:56'!
+test03CanAddItemsInCatalog
+
+
+| cart book1 catalog book2 |
+catalog := ShoppingCatalog new.
+
+
+book1 := Object new.
+book2 := Object new.
+
+catalog at:book1 put:0.
+
+
+cart := MarketFactory emptyCartWithCatalog: catalog.
+
+cart add: book1.
+
+self deny: cart isEmpty.
+self assert: (cart content includes: book1 ).
+
+self should:[cart add: book2] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'the requested item is not in the catalog and cant be added'.
+			self deny: (cart content includes: book2).
+			]! !
+
+!MarketTests methodsFor: 'CartTesting' stamp: 'df 6/24/2017 16:24:07'!
+test04CanAddManyOfTheSameItems
+
+
+| cart book1 catalog book2 |
+catalog := ShoppingCatalog new.
+
+
+book1 := Object new.
+book2 := Object new.
+
+catalog at:book1 put:1.
+catalog at: book2 put:10.
+
+cart := MarketFactory  emptyCartWithCatalog: catalog.
+
+cart add: book1.
+cart add: book2 amount:3.
+
+self deny: cart isEmpty.
+self assert: ((cart content occurrencesOf: book1) = 1 ).
+self assert: ((cart content occurrencesOf: book2) = 3).
+self assert: (cart size=4)
+! !
+
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/24/2017 16:19:10'!
+test07cantCreateACashierWithAnEmptyCart
+
+
+| cart credCard cashier today |
+cart := MarketFactory emptyCart.
+credCard := MarketFactory nonExpiredCard.
+today := MarketFactory  today.
+self should:[cashier:= Cashier withCart: cart aCreditCard: credCard aDate: today]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'cant have a cashier for an empty cart'.
+			self assert: (cashier class =UndefinedObject).
+			].
+! !
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/24/2017 16:19:03'!
+test08cantCreateACashierWithAnExpiredCard
+
+
+| cart credCard cashier today |
+cart := MarketFactory nonEmptyCart.
+
+credCard := MarketFactory expiredCard.
+today := MarketFactory today.
+self should:[cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'cant have a cashier if credit card is expired'.
+			self assert: (cashier class =UndefinedObject).
+			].
+! !
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/24/2017 18:32:54'!
+test09cantCheckOutIfMoneyInCardIsNotEnough
+
+| cart credCard cashier today merchProc |
+cart := MarketFactory nonEmptyCart.
+
+credCard := MarketFactory nonExpiredCard.
+
+today := MarketFactory today.
+
+merchProc := MarketFactory merchProcessorSim: [InterfazMP errorInsufficientFunds].
+merchProc addCard: credCard withAmount: (cart totalPrice -1).
+
+cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today aMerchProcessor: merchProc.
+
+self should:[cashier checkOut]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'the account doesnt have enough funds to pay'.
+			self assert: merchProc cardAmount = (cart totalPrice -1).
+			self assert: cashier saleBook isEmpty.
+
+			].
+
+
+! !
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/24/2017 18:32:58'!
+test10cantCheckOutIfCardIsStolen
+
+| cart credCard cashier today merchProc |
+cart := MarketFactory nonEmptyCart.
+
+credCard := MarketFactory nonExpiredCard.
+
+today := MarketFactory today.
+merchProc := MarketFactory merchProcessorSim: [InterfazMP errorStolenCard].
+
+merchProc addCard: credCard withAmount: 1000.
+
+cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today aMerchProcessor: merchProc.
+
+self should:[cashier checkOut]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'card is stolen'.
+			self assert: merchProc cardAmount = 1000.
+			self assert: cashier saleBook isEmpty.
+
+			].
+
+
+! !
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/24/2017 18:01:06'!
+test11canCheckOutIfMoneyInCardIsEnough
+
+| cart credCard cashier today merchProc |
+cart := MarketFactory nonEmptyCart.
+
+credCard := MarketFactory nonExpiredCard.
+
+today := MarketFactory today.
+
+merchProc := MarketFactory merchProcessorSim: [].
+
+merchProc addCard: credCard withAmount: cart totalPrice.
+
+cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today aMerchProcessor: merchProc.
+
+cashier checkOut.
+
+self assert: merchProc cardAmount = 0.
+self deny: cashier saleBook isEmpty.
+
+
+
+! !
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/24/2017 18:35:11'!
+test12canCheckOutEvenIfMPisUnavailable
+
+| cart credCard cashier today merchProc |
+cart := MarketFactory nonEmptyCart.
+
+credCard := MarketFactory nonExpiredCard.
+
+today := MarketFactory today.
+
+merchProc := MarketFactory merchProcessorSim: [InterfazMP errorMPUnavailable].
+
+merchProc addCard: credCard withAmount: cart totalPrice.
+
+cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today aMerchProcessor: merchProc.
+
+cashier checkOut.
+
+
+self deny: cashier saleBook isEmpty.
+
+
+
+! !
+
+
+!MarketTests methodsFor: 'CreditCardTesting' stamp: 'df 6/16/2017 16:14:40'!
+test05cantCreateCreditCardsWithInvalidNumber
+
+| credCard |
+
+
+
+self should:[credCard := CreditCard withNumber: '123456789012345' Owner: 'john connor'  Expiration: Date today.] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'invalid card number'.
+			self assert: (credCard class =UndefinedObject).
+			].
+! !
+
+!MarketTests methodsFor: 'CreditCardTesting' stamp: 'df 6/16/2017 16:14:23'!
+test06cantCreateCreditCardsWithNoOwner
+
+| credCard |
+
+self should:[credCard := CreditCard withNumber: '1234567890123456' Owner: ''  Expiration: Date today.] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'invalid owner name'.
+			self assert: (credCard class =UndefinedObject).
+			].! !
+
+
+!classDefinition: #Cart category: #'Cart-Solution'!
+Object subclass: #Cart
+	instanceVariableNames: 'catalog content'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:02:24'!
+add: anItem
+
+self add: anItem amount: 1.! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:37:34'!
+add: anItem amount: anAmount
+
+catalog checkIfExists:anItem.
+content add: anItem withOccurrences: anAmount
+! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:32:01'!
+catalog
+^catalog copy
+! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:04:52'!
+content
+^content copy
+! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:00:20'!
+initialize
+
+
+content := Bag new.
+catalog := ShoppingCatalog new! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:06:24'!
+isEmpty
+
+^content isEmpty! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:31:50'!
+size
+^content size
+! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:59:02'!
+totalPrice
+
+| total |
+total := 0.
+content do: [:each | total := total + catalog priceOf: each].
+
+^total! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:01:05'!
+withCatalog: aCatalog
+
+content := Bag new.
+catalog := aCatalog.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cart class' category: #'Cart-Solution'!
+Cart class
+	instanceVariableNames: ''!
+
+!Cart class methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 15:22:21'!
+withCatalog: aCatalog
+
+^self new withCatalog: aCatalog .! !
+
+
+!classDefinition: #InterfazMP category: #'Cart-Solution'!
+Object subclass: #InterfazMP
+	instanceVariableNames: 'card amount'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:48:40'!
+addCard: aCredCard withAmount: anAmount
+
+card := aCredCard.
+amount := anAmount ! !
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:54:50'!
+cardAmount
+^amount! !
+
+!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 19:51:36'!
+debit: anAmount from: aCreditCard! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'InterfazMP class' category: #'Cart-Solution'!
+InterfazMP class
+	instanceVariableNames: ''!
+
+!InterfazMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:31:32'!
+errorInsufficientFunds
+^self error:'the account doesnt have enough funds to pay'! !
+
+!InterfazMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:10:40'!
+errorMPUnavailable
+ ^ErrorMP caido! !
+
+!InterfazMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:30:38'!
+errorStolenCard
+ ^self error:'card is stolen'! !
+
+
+!classDefinition: #MPSimulator category: #'Cart-Solution'!
+InterfazMP subclass: #MPSimulator
+	instanceVariableNames: 'closure'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+!MPSimulator commentStamp: '<historical>' prior: 0!
+El simulador tiene que ser polimorfico con MerchProcessor!
+
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:23:52'!
+debit: anAmount from: aCard
+closure value.
+(amount >= anAmount) ifTrue:[amount := amount - anAmount. ^1.]
+
+
+! !
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 20:00:21'!
+with: aClosure
+
+closure := aClosure! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MPSimulator class' category: #'Cart-Solution'!
+MPSimulator class
+	instanceVariableNames: ''!
+
+!MPSimulator class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:31:38'!
+with: aClosure
+^MPSimulator new with:aClosure ! !
+
+
+!classDefinition: #MerchProcessor category: #'Cart-Solution'!
+InterfazMP subclass: #MerchProcessor
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+
+!classDefinition: #InterfazREST category: #'Cart-Solution'!
+Object subclass: #InterfazREST
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:51'!
+addToCart: anItem
+
+"agregar al carrito"! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:43'!
+checkOut
+
+"hacer checkout"! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:11'!
+createCartfor:anID autenticatedWith: aPassword
+
+"necesito un registro de todos los usuarios con sus respectivas passwords"! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:25'!
+listCart
+
+"listar todos los carritos"! !
+
+!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:34'!
+listPurchases
+"listar las compras"! !
+
+
+!classDefinition: #MarketFactory category: #'Cart-Solution'!
+Object subclass: #MarketFactory
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarketFactory class' category: #'Cart-Solution'!
+MarketFactory class
+	instanceVariableNames: ''!
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:15:48'!
+emptyCart
+^Cart new! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:22:42'!
+emptyCartWithCatalog: aCatalog
+
+^Cart withCatalog: aCatalog.
+
+! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:15:19'!
+expiredCard
+
+| date |
+date := GregorianMonthOfYear yearNumber: 2004 monthNumber:1.
+
+^ CreditCard withNumber: '1234567890123456' Owner: 'john connor'  Expiration: date.! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:34:44'!
+merchProcessorSim: aClosure
+^MPSimulator with: aClosure! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:16:15'!
+nonEmptyCart
+
+| book1 book2 cart catalog |
+
+catalog := ShoppingCatalog new.
+
+
+book1 := Object new.
+book2 := Object new.
+
+catalog at:book1 put:1.
+catalog at: book2 put:10.
+
+cart := Cart withCatalog: catalog.
+
+cart add: book1.
+cart add: book2 amount:3.
+
+^cart! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:15:02'!
+nonExpiredCard
+
+| date |
+date := GregorianMonthOfYear yearNumber: 2020 monthNumber:1.
+
+^ CreditCard withNumber: '1234567890123456' Owner: 'john connor'  Expiration: date.! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:18:28'!
+today
+^ FixedGregorianDate today! !
