@@ -5,17 +5,19 @@ Dictionary subclass: #Cashier
 	poolDictionaries: ''
 	category: 'Cart-Solution'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:29:05'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:03:31'!
+checkIfMPIsUp
+^merchantProcessor isUp! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:14:42'!
 checkOut
 
 | saleAmount |
 saleAmount := cart totalPrice.
+self checkIfMPIsUp ifFalse:[ ^self recordSaleRequest].
 
+merchantProcessor debit: saleAmount from: creditCard.
 
-((merchantProcessor debit: saleAmount from: creditCard) isKindOf: ErrorMP) ifTrue:[ ^self tusLibros].
-
-
- 
 self recordSaleInBook.
 ! !
 
@@ -26,16 +28,24 @@ cart content do:[:each | libroDeVentas add: {each. cart catalog priceOf: each}].
 
 ! !
 
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:06:03'!
+recordSaleRequest
+
+cart content do:[:each | tusLibros add: {each. cart catalog priceOf: each}].
+
+^self error: 'Merchant Processor is down. Request generated'
+! !
+
 !Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/16/2017 16:36:22'!
 saleBook
 ^libroDeVentas copy! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 15:51:26'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 22:48:36'!
 tusLibros
 
-cart content do:[:each | tusLibros add: {each. cart catalog priceOf: each}].! !
+^tusLibros copy! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 15:51:46'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:18:34'!
 withCart: aCart CreditCard: aCreditCard Date: aDate
 
 
@@ -44,7 +54,9 @@ creditCard:=aCreditCard.
 date:= aDate.
 tusLibros := Set new.
 
-libroDeVentas := Set new.! !
+libroDeVentas := Set new.
+
+merchantProcessor := MPSimulator new! !
 
 !Cashier methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 15:51:40'!
 withCart: aCart aCreditCard: aCreditCard aDate: aDate aMerchProcessor: anMP.
@@ -232,29 +244,8 @@ Set subclass: #TusLibros
 	poolDictionaries: ''
 	category: 'Cart-Solution'!
 !TusLibros commentStamp: '<historical>' prior: 0!
-Aca van a ir las ventas que no se puedan realizar cuando el merchan processor este caido, igual que el libro de ventas, debe compartirse entre Cashiers!
+Aca van a ir las ventas que no se puedan realizar cuando el merchant processor este caido, igual que el libro de ventas, debe compartirse entre Cashiers!
 
-
-
-!classDefinition: #ErrorMP category: #'Cart-Solution'!
-Exception subclass: #ErrorMP
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-!ErrorMP commentStamp: '<historical>' prior: 0!
-Es el tipo de excepcion que el MPSimulator devuelve cuando simula que el MP esta caido!
-
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'ErrorMP class' category: #'Cart-Solution'!
-ErrorMP class
-	instanceVariableNames: ''!
-
-!ErrorMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:29:27'!
-caido
-^self new! !
 
 
 !classDefinition: #MarketTests category: #'Cart-Solution'!
@@ -406,7 +397,7 @@ self should:[cart add: book2 amount: -1]
 ! !
 
 
-!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 15:38:53'!
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 23:13:55'!
 testCanCheckOutIfMoneyInCardIsEnough
 
 | cart credCard cashier today merchProc |
@@ -416,7 +407,7 @@ credCard := MarketFactory nonExpiredCard.
 
 today := MarketFactory today.
 
-merchProc := MarketFactory merchProcessorSim: [].
+merchProc := MarketFactory merchProcessorSimOnline: [].
 
 merchProc addCard: credCard withAmount: cart totalPrice.
 
@@ -431,7 +422,7 @@ self deny: cashier saleBook isEmpty.
 
 ! !
 
-!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 15:39:14'!
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 23:41:37'!
 testCantCheckOutIfCardIsStolen
 
 | cart credCard cashier today merchProc |
@@ -440,7 +431,7 @@ cart := MarketFactory nonEmptyCart.
 credCard := MarketFactory nonExpiredCard.
 
 today := MarketFactory today.
-merchProc := MarketFactory merchProcessorSim: [InterfazMP errorStolenCard].
+merchProc := MarketFactory merchProcessorSimOnline: [MerchantProcessorInterface errorStolenCard].
 
 merchProc addCard: credCard withAmount: 1000.
 
@@ -459,18 +450,19 @@ self should:[cashier checkOut]
 
 ! !
 
-!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 15:39:19'!
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 23:41:29'!
 testCantCheckOutIfMoneyInCardIsNotEnough
 
-| cart credCard cashier today merchProc |
+| cart credCard cashier today merchProc money |
 cart := MarketFactory nonEmptyCart.
 
 credCard := MarketFactory nonExpiredCard.
 
 today := MarketFactory today.
 
-merchProc := MarketFactory merchProcessorSim: [InterfazMP errorInsufficientFunds].
-merchProc addCard: credCard withAmount: (cart totalPrice -1).
+merchProc := MarketFactory merchProcessorSimOnline: [MerchantProcessorInterface errorInsufficientFunds].
+money := cart totalPrice -1.
+merchProc addCard: credCard withAmount: money.
 
 cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today aMerchProcessor: merchProc.
 
@@ -479,7 +471,7 @@ self should:[cashier checkOut]
 		withExceptionDo: [
 			:anError |
 			self assert: anError messageText equals: 'the account doesnt have enough funds to pay'.
-			self assert: merchProc cardAmount = (cart totalPrice -1).
+			self assert: merchProc cardAmount = money.
 			self assert: cashier saleBook isEmpty.
 
 			].
@@ -520,6 +512,41 @@ self should:[cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: toda
 			self assert: anError messageText equals: 'cant have a cashier if credit card is expired'.
 			self assert: (cashier class =UndefinedObject).
 			].
+! !
+
+!MarketTests methodsFor: 'CashierTesting' stamp: 'df 6/26/2017 23:17:14'!
+testWhenMerchantProcessorIsUnavaliableTheSaleRequestIsRecordedInstead
+
+| cart credCard cashier today merchProc money |
+cart := MarketFactory nonEmptyCart.
+
+credCard := MarketFactory nonExpiredCard.
+
+today := MarketFactory today.
+
+merchProc := MarketFactory merchProcessorSimOffline: [].
+
+money := cart totalPrice.
+merchProc addCard: credCard withAmount: money.
+
+cashier:= Cashier withCart: cart aCreditCard: credCard  aDate: today aMerchProcessor: merchProc.
+
+
+
+self should:[cashier checkOut]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [
+			:anError |
+			self assert: anError messageText equals: 'Merchant Processor is down. Request generated'.
+			self assert: merchProc cardAmount = money.
+			self assert: cashier saleBook isEmpty.
+			self deny: cashier tusLibros isEmpty.
+
+			].
+
+
+
+
 ! !
 
 
@@ -571,6 +598,7 @@ self should:[credCard := CreditCard withNumber: '1234567890123456' Owner: ''  Ex
 			self assert: anError messageText equals: 'invalid owner name'.
 			self assert: (credCard class =UndefinedObject).
 			].! !
+
 
 
 !classDefinition: #Cart category: #'Cart-Solution'!
@@ -647,122 +675,6 @@ withCatalog: aCatalog
 ^self new withCatalog: aCatalog .! !
 
 
-!classDefinition: #InterfazMP category: #'Cart-Solution'!
-Object subclass: #InterfazMP
-	instanceVariableNames: 'card amount'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-
-!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:48:40'!
-addCard: aCredCard withAmount: anAmount
-
-card := aCredCard.
-amount := anAmount ! !
-
-!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:54:50'!
-cardAmount
-^amount! !
-
-!InterfazMP methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 19:51:36'!
-debit: anAmount from: aCreditCard! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'InterfazMP class' category: #'Cart-Solution'!
-InterfazMP class
-	instanceVariableNames: ''!
-
-!InterfazMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:31:32'!
-errorInsufficientFunds
-^self error:'the account doesnt have enough funds to pay'! !
-
-!InterfazMP class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:30:38'!
-errorStolenCard
- ^self error:'card is stolen'! !
-
-
-!classDefinition: #MPSimulator category: #'Cart-Solution'!
-InterfazMP subclass: #MPSimulator
-	instanceVariableNames: 'closure'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-!MPSimulator commentStamp: '<historical>' prior: 0!
-El simulador tiene que ser polimorfico con MerchProcessor!
-
-
-!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:23:52'!
-debit: anAmount from: aCard
-closure value.
-(amount >= anAmount) ifTrue:[amount := amount - anAmount. ^1.]
-
-
-! !
-
-!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/22/2017 20:00:21'!
-with: aClosure
-
-closure := aClosure! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'MPSimulator class' category: #'Cart-Solution'!
-MPSimulator class
-	instanceVariableNames: ''!
-
-!MPSimulator class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 16:01:44'!
-errorMPUnavailable
- ^ErrorMP caido! !
-
-!MPSimulator class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:31:38'!
-with: aClosure
-^MPSimulator new with:aClosure ! !
-
-
-!classDefinition: #MerchProcessor category: #'Cart-Solution'!
-InterfazMP subclass: #MerchProcessor
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-
-
-!classDefinition: #InterfazREST category: #'Cart-Solution'!
-Object subclass: #InterfazREST
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cart-Solution'!
-!InterfazREST commentStamp: '<historical>' prior: 0!
-Esta interfaz tiene que conocer todo: las id's y passwords de los usuarios para autenticar, el catalogo para los carritos, el libro de ventas, tusLibros, al merchant processor, cuanto tiempo paso desde la ultima vez que se uso el carrito!
-
-
-!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:51'!
-addToCart: anItem
-
-"agregar al carrito"! !
-
-!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:43'!
-checkOut
-
-"hacer checkout"! !
-
-!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:11'!
-createCartfor:anID autenticatedWith: aPassword
-
-"necesito un registro de todos los usuarios con sus respectivas passwords"! !
-
-!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:25'!
-listCart
-
-"listar todos los carritos"! !
-
-!InterfazREST methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 18:36:34'!
-listPurchases
-"listar las compras"! !
-
-
 !classDefinition: #MarketFactory category: #'Cart-Solution'!
 Object subclass: #MarketFactory
 	instanceVariableNames: ''
@@ -798,9 +710,21 @@ date := GregorianMonthOfYear yearNumber: 2004 monthNumber:1.
 
 ^ CreditCard withNumber: '1234567890123456' Owner: 'john connor'  Expiration: date.! !
 
-!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:34:44'!
-merchProcessorSim: aClosure
-^MPSimulator with: aClosure! !
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:26:46'!
+incompleteSales
+
+| incompleteSalesBook |
+incompleteSalesBook := TusLibros new.
+
+^incompleteSalesBook ! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:13:14'!
+merchProcessorSimOffline: aClosure 
+^MPSimulator with: aClosure online:false! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:13:08'!
+merchProcessorSimOnline: aClosure 
+^MPSimulator with: aClosure online:true! !
 
 !MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:16:15'!
 nonEmptyCart
@@ -823,14 +747,200 @@ cart add: book2 amount:3.
 
 ^cart! !
 
-!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:15:02'!
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:29:22'!
 nonExpiredCard
 
 | date |
-date := GregorianMonthOfYear yearNumber: 2020 monthNumber:1.
+date := GregorianMonthOfYear yearNumber: 3020 monthNumber:1.
 
 ^ CreditCard withNumber: '1234567890123456' Owner: 'john connor'  Expiration: date.! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:27:10'!
+salesBook
+
+| salesbook |
+salesbook := LibroDeVentas new.
+
+^salesbook! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:24:04'!
+salesCatalog
+
+
+
+| book1 book2 book3 catalog |
+
+catalog := ShoppingCatalog new.
+
+
+book1 := Object new.
+book2 := Object new.
+book3 := Object new.
+catalog at:book1 put:1.
+catalog at: book2 put:10.
+catalog at: book3 put:15.
+
+^catalog.! !
 
 !MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:18:28'!
 today
 ^ FixedGregorianDate today! !
+
+!MarketFactory class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:21:48'!
+usersDB
+
+| users |
+users := Dictionary new.
+
+users at: 'jack test' put: 'password'.
+users at: 'john test' put: '123456'.
+^users! !
+
+
+!classDefinition: #MerchantProcessorInterface category: #'Cart-Solution'!
+Object subclass: #MerchantProcessorInterface
+	instanceVariableNames: 'card amount'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!MerchantProcessorInterface methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:48:40'!
+addCard: aCredCard withAmount: anAmount
+
+card := aCredCard.
+amount := anAmount ! !
+
+!MerchantProcessorInterface methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:54:50'!
+cardAmount
+^amount! !
+
+!MerchantProcessorInterface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 22:46:40'!
+debit: anAmount from: aCreditCard
+
+^self subclassResponsibility! !
+
+!MerchantProcessorInterface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:04:04'!
+isUp
+
+^self subclassResponsibility! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MerchantProcessorInterface class' category: #'Cart-Solution'!
+MerchantProcessorInterface class
+	instanceVariableNames: ''!
+
+!MerchantProcessorInterface class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:31:32'!
+errorInsufficientFunds
+^self error:'the account doesnt have enough funds to pay'! !
+
+!MerchantProcessorInterface class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 22:51:41'!
+errorMPUnavailable
+ ^self error:'Merchant Processor is not available'! !
+
+!MerchantProcessorInterface class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 17:30:38'!
+errorStolenCard
+ ^self error:'card is stolen'! !
+
+
+!classDefinition: #MPSimulator category: #'Cart-Solution'!
+MerchantProcessorInterface subclass: #MPSimulator
+	instanceVariableNames: 'closure status'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+!MPSimulator commentStamp: '<historical>' prior: 0!
+El simulador tiene que ser polimorfico con MerchProcessor!
+
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:08:39'!
+debit: anAmount from: aCard
+closure value.
+(amount >= anAmount) ifTrue:[amount := amount - anAmount.]
+
+
+! !
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:09:59'!
+isUp
+
+^status! !
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:12:07'!
+with: aClosure
+
+closure := aClosure.
+status := true.! !
+
+!MPSimulator methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:12:24'!
+with: aClosure  online:aBoolean
+
+closure := aClosure.
+status := aBoolean .! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MPSimulator class' category: #'Cart-Solution'!
+MPSimulator class
+	instanceVariableNames: ''!
+
+!MPSimulator class methodsFor: 'as yet unclassified' stamp: 'df 6/24/2017 16:31:38'!
+with: aClosure
+^MPSimulator new with:aClosure ! !
+
+!MPSimulator class methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:11:17'!
+with: aClosure online:aBoolean
+^MPSimulator new with:aClosure online:aBoolean ! !
+
+
+!classDefinition: #MerchantProcessor category: #'Cart-Solution'!
+MerchantProcessorInterface subclass: #MerchantProcessor
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+
+!MerchantProcessor methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:16:30'!
+debit: anAmount from: aCreditCard
+! !
+
+!MerchantProcessor methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:16:42'!
+isUp
+! !
+
+
+!classDefinition: #'REST-Interface' category: #'Cart-Solution'!
+Object subclass: #'REST-Interface'
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Cart-Solution'!
+!REST-Interface commentStamp: '<historical>' prior: 0!
+Esta interfaz tiene que conocer todo: las id's y passwords de los usuarios para autenticar, el catalogo para los carritos, el libro de ventas, tusLibros, al merchant processor, cuanto tiempo paso desde la ultima vez que se uso el carrito!
+
+
+!REST-Interface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:35:02'!
+add: anItem Amount:anAmount ToCart: aCartID
+
+"agregar item al carrito"! !
+
+!REST-Interface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:35:57'!
+checkOut: aCart with: aCreditCard
+
+"hacer checkout del carrito"! !
+
+!REST-Interface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:33:53'!
+createCartfor:aUserID autenticatedWith: aPassword
+
+"necesito un registro de todos los usuarios con sus respectivas passwords"
+"creo un carrito para el usuario y devuelvo el ID del carrito"! !
+
+!REST-Interface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:35:40'!
+listCart: aCartID
+
+"listar contenido del carrito"! !
+
+!REST-Interface methodsFor: 'as yet unclassified' stamp: 'df 6/26/2017 23:39:14'!
+listPurchasesOf:aCostumerID pass: aPassword
+"listar las compras del cliente"
+"para cada cliente hay que guardar un libro de ventas que tenga su historial de compras"! !
